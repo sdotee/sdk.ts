@@ -1,12 +1,15 @@
-import axios, {AxiosInstance, AxiosResponse, HttpStatusCode} from 'axios';
+import axios, {AxiosInstance, AxiosResponse, HttpStatusCode} from "axios";
 import {
     SdkConfig,
     UrlShortenRequest,
     UrlShortenResponse,
-    ApiError, UrlShortenDeleteRequest, DomainListResponse, UrlShortenUpdateRequest
-} from './types';
-import {UrlShortenerError, NetworkError} from './errors';
-import {Validator} from './validator';
+    ApiError,
+    UrlShortenDeleteRequest,
+    DomainListResponse,
+    UrlShortenUpdateRequest,
+} from "./types";
+import {UrlShortenerError, NetworkError} from "./errors";
+import {Validator} from "./validator";
 import * as process from "node:process";
 import {UserAgent} from "./version";
 
@@ -15,8 +18,8 @@ export class UrlShortenSDK {
     private config: SdkConfig;
 
     constructor(config: SdkConfig) {
-        if (config.baseUrl === undefined || config.baseUrl === '') {
-            config.baseUrl = process.env.API_BASE_URL || 'https://s.ee';
+        if (config.baseUrl === undefined || config.baseUrl === "") {
+            config.baseUrl = process.env.API_BASE_URL || "https://s.ee";
         }
 
         this.config = config;
@@ -24,11 +27,25 @@ export class UrlShortenSDK {
             baseURL: config.baseUrl,
             timeout: config.timeout || 10000,
             headers: {
-                'Authorization': `${config.apiKey}`,
-                'Content-Type': 'application/json',
-                'User-Agent': UserAgent,
-            }
+                Authorization: `${config.apiKey}`,
+                "Content-Type": "application/json",
+                "User-Agent": UserAgent,
+            },
         });
+
+        if (process.env.HTTP_PROXY != "" && process.env.HTTP_PROXY !== undefined) {
+            // Parse proxy URL (e.g., http://127.0.0.1:1080)
+            try {
+                const proxyUrl = new URL(process.env.HTTP_PROXY);
+                this.client.defaults.proxy = {
+                    host: proxyUrl.hostname,
+                    port: parseInt(proxyUrl.port, 10),
+                };
+                // console.log("Proxy configured:", this.client.defaults.proxy);
+            } catch (error) {
+                console.warn("Invalid proxy URL format:", process.env.HTTP_PROXY);
+            }
+        }
 
         this.setupInterceptors();
     }
@@ -39,14 +56,14 @@ export class UrlShortenSDK {
             (error: any) => {
                 if (error.response) {
                     const apiError: ApiError = {
-                        code: error.response.data?.code || 'UNKNOWN_ERROR',
-                        message: error.response.data?.message || 'An unknown error occurred'
+                        code: error.response.data?.code || "UNKNOWN_ERROR",
+                        message: error.response.data?.message || "An unknown error occurred",
                     };
                     throw new UrlShortenerError(apiError);
                 } else if (error.request) {
-                    throw new NetworkError('Network error: Unable to reach the server', error.response?.status);
+                    throw new NetworkError("Network error: Unable to reach the server", error.response?.status);
                 } else {
-                    throw new NetworkError('Request configuration error');
+                    throw new NetworkError("Request configuration error");
                 }
             }
         );
@@ -62,7 +79,14 @@ export class UrlShortenSDK {
         Validator.validateUrl(request.target_url);
 
         try {
-            const response: AxiosResponse<UrlShortenResponse> = await this.client.post('/api/v1/shorten', request);
+            const response: AxiosResponse<UrlShortenResponse> = await this.client.post("/api/v1/shorten", request);
+
+            if (!response) {
+                throw new UrlShortenerError({
+                    message: `Failed to create short URL, status code is not Ok`,
+                    code: "API_ERROR",
+                });
+            }
 
             return {
                 ...response.data,
@@ -71,7 +95,8 @@ export class UrlShortenSDK {
             if (error instanceof UrlShortenerError || error instanceof NetworkError) {
                 throw error;
             }
-            throw new NetworkError('Failed to create short URL');
+            console.info(error);
+            throw new NetworkError("Failed to create short URL");
         }
     }
 
@@ -83,46 +108,46 @@ export class UrlShortenSDK {
     async delete(request: UrlShortenDeleteRequest): Promise<UrlShortenResponse> {
         try {
             const response: AxiosResponse<UrlShortenResponse> = await this.client.delete(`/api/v1/shorten`, {
-                data: request
+                data: request,
             });
             return response.data;
         } catch (error) {
             if (error instanceof UrlShortenerError || error instanceof NetworkError) {
                 throw error;
             }
-            throw new NetworkError('Failed to delete short URL');
+            throw new NetworkError("Failed to delete short URL");
         }
     }
 
     async update(request: UrlShortenUpdateRequest): Promise<UrlShortenResponse> {
         try {
-            const response: AxiosResponse<UrlShortenResponse> = await this.client.put('/api/v1/shorten', request);
+            const response: AxiosResponse<UrlShortenResponse> = await this.client.put("/api/v1/shorten", request);
             return response.data;
         } catch (error) {
             if (error instanceof UrlShortenerError || error instanceof NetworkError) {
                 throw error;
             }
 
-            throw new NetworkError('Failed to update short URL');
+            throw new NetworkError("Failed to update short URL");
         }
     }
 
     async listDomains(): Promise<DomainListResponse> {
         try {
-            const response: AxiosResponse<DomainListResponse> = await this.client.get('/api/v1/domains');
-            if (response && response.status == HttpStatusCode.Ok) {
+            const response: AxiosResponse<DomainListResponse> = await this.client.get("/api/v1/domains");
+            if (response.status === HttpStatusCode.Ok) {
                 return response.data;
             } else {
                 throw new UrlShortenerError({
-                    code: 'API_ERROR',
-                    message: `Failed to fetch domains, status code: ${response.status}`,
+                    code: "API_ERROR",
+                    message: `Failed to fetch domains`,
                 });
             }
         } catch (error) {
             if (error instanceof UrlShortenerError || error instanceof NetworkError) {
                 throw error;
             }
-            throw new NetworkError('Failed to fetch domains');
+            throw new NetworkError("Failed to fetch domains");
         }
     }
 
@@ -138,7 +163,7 @@ export class UrlShortenSDK {
         }
 
         if (newConfig.apiKey) {
-            this.client.defaults.headers['Authorization'] = `${newConfig.apiKey}`;
+            this.client.defaults.headers["Authorization"] = `${newConfig.apiKey}`;
         }
 
         if (newConfig.timeout) {
