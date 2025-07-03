@@ -12,6 +12,7 @@ import {UrlShortenerError, NetworkError} from "./errors";
 import {Validator} from "./validator";
 import * as process from "node:process";
 import {UserAgent} from "./version";
+import * as https from "node:https";
 
 export class UrlShortenSDK {
     private client: AxiosInstance;
@@ -33,15 +34,20 @@ export class UrlShortenSDK {
             },
         });
 
-        if (process.env.HTTP_PROXY != "" && process.env.HTTP_PROXY !== undefined) {
+        if (process.env.HTTP_PROXY !== undefined && process.env.HTTP_PROXY != "") {
+            // this.client.defaults.httpsAgent = new https.Agent({
+            //     rejectUnauthorized: false
+            // });
+
             // Parse proxy URL (e.g., http://127.0.0.1:1080)
             try {
                 const proxyUrl = new URL(process.env.HTTP_PROXY);
                 this.client.defaults.proxy = {
+                    protocol: proxyUrl.protocol.replace(":", ""), // Remove the colon
                     host: proxyUrl.hostname,
                     port: parseInt(proxyUrl.port, 10),
                 };
-                // console.log("Proxy configured:", this.client.defaults.proxy);
+                console.log("Proxy configured:", this.client.defaults.proxy);
             } catch (error) {
                 console.warn("Invalid proxy URL format:", process.env.HTTP_PROXY);
             }
@@ -61,7 +67,7 @@ export class UrlShortenSDK {
                     };
                     throw new UrlShortenerError(apiError);
                 } else if (error.request) {
-                    throw new NetworkError("Network error: Unable to reach the server", error.response?.status);
+                    throw new NetworkError(error.message);
                 } else {
                     throw new NetworkError("Request configuration error");
                 }
@@ -135,7 +141,7 @@ export class UrlShortenSDK {
     async listDomains(): Promise<DomainListResponse> {
         try {
             const response: AxiosResponse<DomainListResponse> = await this.client.get("/api/v1/domains");
-            if (response.status === HttpStatusCode.Ok) {
+            if (response.data && response.status === HttpStatusCode.Ok) {
                 return response.data;
             } else {
                 throw new UrlShortenerError({
