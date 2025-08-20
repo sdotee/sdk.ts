@@ -1,196 +1,196 @@
 # See URL Shortener SDK
 
-一个基于 TypeScript 的 URL 缩短服务 SDK，为 See 短链接服务提供完整的 API 封装。
+A TypeScript-based SDK for the See URL shortener service, providing a complete API wrapper.
 
-## 功能特性
+## Features
 
-- ✅ 创建短链接（支持自定义域名和短码）
-- ✅ 删除短链接
-- ✅ 更新短链接（修改目标链接和标题）
-- ✅ 获取可用域名列表
-- ✅ 完整的 TypeScript 类型支持
-- ✅ 输入验证
-- ✅ 错误处理和重试机制
-- ✅ 可配置的 HTTP 客户端
-- ✅ 完整的单元测试
-- ✅ 支持环境变量配置
+- ✅ Create short URLs (supports custom domains and slugs)
+- ✅ Delete short URLs
+- ✅ Update short URLs (change target URL and title)
+- ✅ List available domains
+- ✅ Full TypeScript type support
+- ✅ Input validation
+- ✅ Error handling and retry mechanism
+- ✅ Configurable HTTP client
+- ✅ Comprehensive unit tests
+- ✅ Environment variable configuration
 
-## 安装
+## Installation
 
 ```bash
 npm install url-shortener-sdk
-# 或者
+# or
 pnpm install url-shortener-sdk
 ```
 
-## 快速开始
+## Quick Start
 
-### 基本使用
+### Basic Usage
 
 ```typescript
 import { UrlShortenSDK } from 'url-shortener-sdk';
 
-// 初始化 SDK
+// Initialize SDK
 const sdk = new UrlShortenSDK({
-  baseUrl: 'https://s.ee', // 默认值，可以省略
+  baseUrl: 'https://s.ee', // Default value, optional
   apiKey: 'your-api-key',
-  timeout: 10000 // 可选，默认 10 秒
+  timeout: 10000 // Optional, default is 10 seconds
 });
 
-// 或者使用环境变量（API_BASE_URL）
+// Or use environment variable (API_BASE_URL)
 const sdk = new UrlShortenSDK({
   apiKey: 'your-api-key'
 });
 
-// 获取可用域名列表
+// List available domains
 try {
   const domains = await sdk.listDomains();
-  console.log('可用域名:', domains.data.domains);
+  console.log('Available domains:', domains.data.domains);
 } catch (error) {
-  console.error('获取域名失败:', error.message);
+  console.error('Failed to get domains:', error.message);
 }
 
-// 创建短链接
+// Create short URL
 try {
   const result = await sdk.create({
     domain: 'ba.sh',
     target_url: 'https://example.com/very/long/url',
-    custom_slug: 'my-link', // 可选
-    title: '我的链接' // 可选
+    custom_slug: 'my-link', // Optional
+    title: 'My Link' // Optional
   });
   
-  console.log('短链接已创建:', result.data.short_url);
-  console.log('短码:', result.data.slug);
+  console.log('Short URL created:', result.data.short_url);
+  console.log('Slug:', result.data.slug);
 } catch (error) {
-  console.error('创建失败:', error.message);
+  console.error('Creation failed:', error.message);
 }
 
-// 更新短链接
+// Update short URL
 try {
   const result = await sdk.update({
     domain: 'ba.sh',
     slug: 'my-link',
     target_url: 'https://new-target.com',
-    title: '更新后的标题'
+    title: 'Updated Title'
   });
-  console.log('更新成功:', result.data.short_url);
+  console.log('Update successful:', result.data.short_url);
 } catch (error) {
-  console.error('更新失败:', error.message);
+  console.error('Update failed:', error.message);
 }
 
-// 删除短链接
+// Delete short URL
 try {
   const result = await sdk.delete({
     domain: 'ba.sh',
     slug: 'my-link'
   });
-  console.log('删除成功:', result.message);
+  console.log('Delete successful:', result.message);
 } catch (error) {
-  console.error('删除失败:', error.message);
+  console.error('Delete failed:', error.message);
 }
 ```
 
-## API 参考
+## API Reference
 
 ### UrlShortenSDK
 
-#### 构造函数
+#### Constructor
 
 ```typescript
 new UrlShortenSDK(config: SdkConfig)
 ```
 
-**SdkConfig 参数:**
+**SdkConfig Parameters:**
 
-| 参数    | 类型   | 必需 | 描述                              |
-| ------- | ------ | ---- | --------------------------------- |
-| baseUrl | string | ❌    | API 基础 URL，默认 'https://s.ee' |
-| apiKey  | string | ✅    | API 密钥                          |
-| timeout | number | ❌    | 请求超时时间（毫秒），默认 10000  |
+| Name    | Type   | Required | Description                          |
+| ------- | ------ | -------- | ------------------------------------ |
+| baseUrl | string | No       | API base URL, default 'https://s.ee' |
+| apiKey  | string | Yes      | API key                              |
+| timeout | number | No       | Request timeout (ms), default 10000  |
 
-#### 方法
+#### Methods
 
 ##### create(request: UrlShortenRequest): Promise<UrlShortenResponse>
 
-创建一个新的短链接。
+Create a new short URL.
 
-**UrlShortenRequest 参数:**
+**UrlShortenRequest Parameters:**
 
-| 参数        | 类型   | 必需 | 描述             |
-| ----------- | ------ | ---- | ---------------- |
-| domain      | string | ✅    | 使用的域名       |
-| target_url  | string | ✅    | 要缩短的目标 URL |
-| custom_slug | string | ❌    | 自定义短链接代码 |
-| title       | string | ❌    | 链接标题         |
+| Name        | Type   | Required | Description           |
+| ----------- | ------ | -------- | --------------------- |
+| domain      | string | Yes      | Domain to use         |
+| target_url  | string | Yes      | Target URL to shorten |
+| custom_slug | string | No       | Custom short code     |
+| title       | string | No       | Link title            |
 
-**返回值 UrlShortenResponse:**
+**Returns UrlShortenResponse:**
 
 ```typescript
 {
-  code: number;     // 响应状态码
-  message: string;  // 响应消息
+  code: number;     // Response status code
+  message: string;  // Response message
   data: {
-    short_url: string;    // 生成的短链接
-    slug: string;         // 短链接代码
-    custom_slug?: string; // 自定义短码（如果设置）
+    short_url: string;    // Generated short URL
+    slug: string;         // Short code
+    custom_slug?: string; // Custom slug (if set)
   }
 }
 ```
 
 ##### delete(request: UrlShortenDeleteRequest): Promise<UrlShortenResponse>
 
-删除指定的短链接。
+Delete a specified short URL.
 
-**UrlShortenDeleteRequest 参数:**
+**UrlShortenDeleteRequest Parameters:**
 
-| 参数   | 类型   | 必需 | 描述         |
-| ------ | ------ | ---- | ------------ |
-| domain | string | ✅    | 短链接的域名 |
-| slug   | string | ✅    | 短链接的代码 |
+| Name   | Type   | Required | Description       |
+| ------ | ------ | -------- | ----------------- |
+| domain | string | Yes      | Domain of the URL |
+| slug   | string | Yes      | Short code        |
 
 ##### update(request: UrlShortenUpdateRequest): Promise<UrlShortenResponse>
 
-更新指定的短链接。
+Update a specified short URL.
 
-**UrlShortenUpdateRequest 参数:**
+**UrlShortenUpdateRequest Parameters:**
 
-| 参数       | 类型   | 必需 | 描述         |
-| ---------- | ------ | ---- | ------------ |
-| domain     | string | ✅    | 短链接的域名 |
-| slug       | string | ✅    | 短链接的代码 |
-| target_url | string | ✅    | 新的目标 URL |
-| title      | string | ✅    | 新的链接标题 |
+| Name       | Type   | Required | Description       |
+| ---------- | ------ | -------- | ----------------- |
+| domain     | string | Yes      | Domain of the URL |
+| slug       | string | Yes      | Short code        |
+| target_url | string | Yes      | New target URL    |
+| title      | string | Yes      | New link title    |
 
 ##### listDomains(): Promise<DomainListResponse>
 
-获取可用的域名列表。
+Get the list of available domains.
 
-**返回值 DomainListResponse:**
+**Returns DomainListResponse:**
 
 ```typescript
 {
-  code: number;     // 响应状态码
-  message: string;  // 响应消息
+  code: number;     // Response status code
+  message: string;  // Response message
   data: {
-    domains: string[]; // 可用域名数组
+    domains: string[]; // Array of available domains
   }
 }
 ```
 
 ##### updateConfig(newConfig: Partial<SdkConfig>): void
 
-更新 SDK 配置。
+Update SDK configuration.
 
-**参数:**
-- `newConfig`: 部分配置对象，只需提供要更新的字段
+**Parameter:**
+- `newConfig`: Partial config object, only provide fields to update
 
-## 错误处理
+## Error Handling
 
-SDK 提供了三种主要的错误类型：
+The SDK provides three main error types:
 
 ### ValidationError
 
-输入验证错误，当提供的参数不符合要求时抛出。
+Input validation error, thrown when parameters are invalid.
 
 ```typescript
 import { ValidationError } from 'url-shortener-sdk';
@@ -202,14 +202,14 @@ try {
   });
 } catch (error) {
   if (error instanceof ValidationError) {
-    console.log('验证错误:', error.message);
+    console.log('Validation error:', error.message);
   }
 }
 ```
 
 ### NetworkError
 
-网络请求错误，当网络连接失败或超时时抛出。
+Network request error, thrown when connection fails or times out.
 
 ```typescript
 import { NetworkError } from 'url-shortener-sdk';
@@ -221,15 +221,15 @@ try {
   });
 } catch (error) {
   if (error instanceof NetworkError) {
-    console.log('网络错误:', error.message);
-    console.log('状态码:', error.statusCode); // 可能为 undefined
+    console.log('Network error:', error.message);
+    console.log('Status code:', error.statusCode); // May be undefined
   }
 }
 ```
 
 ### UrlShortenerError
 
-API 错误，当服务器返回错误响应时抛出。
+API error, thrown when the server returns an error response.
 
 ```typescript
 import { UrlShortenerError } from 'url-shortener-sdk';
@@ -241,33 +241,33 @@ try {
   });
 } catch (error) {
   if (error instanceof UrlShortenerError) {
-    console.log('API 错误:', error.message);
-    console.log('错误代码:', error.code);
-    console.log('错误详情:', error.details);
+    console.log('API error:', error.message);
+    console.log('Error code:', error.code);
+    console.log('Error details:', error.details);
   }
 }
 ```
 
-## 高级用法
+## Advanced Usage
 
-### 环境变量配置
+### Environment Variable Configuration
 
-SDK 支持通过环境变量进行配置：
+SDK supports configuration via environment variables:
 
 ```bash
-# .env 文件
+# .env file
 API_BASE_URL=https://s.ee
 API_KEY=your-api-key
 ```
 
 ```typescript
-// 使用环境变量时，只需提供 apiKey
+// When using environment variables, only provide apiKey
 const sdk = new UrlShortenSDK({
   apiKey: process.env.API_KEY || 'your-api-key'
 });
 ```
 
-### 动态配置更新
+### Dynamic Configuration Update
 
 ```typescript
 const sdk = new UrlShortenSDK({
@@ -275,14 +275,14 @@ const sdk = new UrlShortenSDK({
   apiKey: 'initial-key'
 });
 
-// 稍后更新配置
+// Update config later
 sdk.updateConfig({
   apiKey: 'new-api-key',
   timeout: 15000
 });
 ```
 
-### 批量操作示例
+### Batch Operation Example
 
 ```typescript
 async function createMultipleUrls(urls: { domain: string, target_url: string, title?: string }[]) {
@@ -293,62 +293,62 @@ async function createMultipleUrls(urls: { domain: string, target_url: string, ti
       const result = await sdk.create(urlData);
       results.push(result);
     } catch (error) {
-      console.error(`创建 ${urlData.target_url} 失败:`, error.message);
+      console.error(`Failed to create ${urlData.target_url}:`, error.message);
     }
   }
   
   return results;
 }
 
-// 使用示例
+// Usage example
 const urlsToShorten = [
-  { domain: 'ba.sh', target_url: 'https://example1.com', title: '示例1' },
-  { domain: 'ba.sh', target_url: 'https://example2.com', title: '示例2' },
-  { domain: 'ba.sh', target_url: 'https://example3.com', title: '示例3' }
+  { domain: 'ba.sh', target_url: 'https://example1.com', title: 'Example 1' },
+  { domain: 'ba.sh', target_url: 'https://example2.com', title: 'Example 2' },
+  { domain: 'ba.sh', target_url: 'https://example3.com', title: 'Example 3' }
 ];
 
 const results = await createMultipleUrls(urlsToShorten);
 ```
 
-### 完整工作流程示例
+### Complete Workflow Example
 
 ```typescript
 async function completeWorkflow() {
-  // 1. 获取可用域名
+  // 1. Get available domains
   const domains = await sdk.listDomains();
   const availableDomain = domains.data.domains[0];
   
-  // 2. 创建短链接
+  // 2. Create short URL
   const createResult = await sdk.create({
     domain: availableDomain,
     target_url: 'https://example.com',
     custom_slug: 'my-link',
-    title: '我的示例链接'
+    title: 'My Example Link'
   });
   
-  console.log('创建成功:', createResult.data.short_url);
+  console.log('Created:', createResult.data.short_url);
   
-  // 3. 更新短链接
+  // 3. Update short URL
   const updateResult = await sdk.update({
     domain: availableDomain,
     slug: createResult.data.slug,
     target_url: 'https://updated-example.com',
-    title: '更新后的标题'
+    title: 'Updated Title'
   });
   
-  console.log('更新成功:', updateResult.data.short_url);
+  console.log('Updated:', updateResult.data.short_url);
   
-  // 4. 删除短链接
+  // 4. Delete short URL
   const deleteResult = await sdk.delete({
     domain: availableDomain,
     slug: createResult.data.slug
   });
   
-  console.log('删除成功:', deleteResult.message);
+  console.log('Deleted:', deleteResult.message);
 }
 ```
 
-### 错误重试机制
+### Error Retry Mechanism
 
 ```typescript
 async function createWithRetry(
@@ -364,12 +364,12 @@ async function createWithRetry(
       lastError = error;
       
       if (error instanceof ValidationError) {
-        // 验证错误不需要重试
+        // No retry for validation errors
         throw error;
       }
       
       if (i < maxRetries - 1) {
-        // 等待后重试
+        // Wait and retry
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
       }
     }
@@ -379,64 +379,64 @@ async function createWithRetry(
 }
 ```
 
-## 开发
+## Development
 
-### 安装依赖
+### Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### 运行测试
+### Run tests
 
 ```bash
 pnpm test
 ```
 
-### 监听模式测试
+### Watch mode tests
 
 ```bash
 pnpm test:watch
 ```
 
-### 构建
+### Build
 
 ```bash
 pnpm run build
 ```
 
-### 代码检查
+### Lint
 
 ```bash
 pnpm run lint
 ```
 
-### 开发模式
+### Development mode
 
 ```bash
 pnpm run dev
 ```
 
-## 类型定义
+## Type Definitions
 
-所有的 TypeScript 类型定义都包含在包中，无需额外安装类型包。
+All TypeScript type definitions are included in the package. No need to install extra type packages.
 
-## 许可证
+## License
 
 MIT
 
-## 贡献
+## Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Issues and Pull Requests are welcome!
 
-## 更新日志
+## Changelog
 
 ### 1.0.0
-- 初始版本发布
-- 支持创建、删除和更新短链接
-- 支持获取可用域名列表
-- 完整的 TypeScript 支持
-- 输入验证和错误处理
-- 支持自定义域名和短码
-- 支持环境变量配置
-- 完整的单元测试覆盖
+- Initial release
+- Support for creating, deleting, and updating short URLs
+- Support for listing available domains
+- Full TypeScript support
+- Input validation and error handling
+- Support for custom domains and slugs
+- Environment variable configuration
+- Comprehensive unit test coverage
