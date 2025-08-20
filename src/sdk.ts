@@ -1,18 +1,17 @@
-import axios, {AxiosInstance, AxiosResponse, HttpStatusCode} from "axios";
+import axios, { AxiosInstance, AxiosResponse, HttpStatusCode } from "axios";
 import {
+    ApiError,
+    DomainListResponse,
     SdkConfig,
+    UrlShortenDeleteRequest,
     UrlShortenRequest,
     UrlShortenResponse,
-    ApiError,
-    UrlShortenDeleteRequest,
-    DomainListResponse,
     UrlShortenUpdateRequest,
 } from "./types";
-import {UrlShortenerError, NetworkError} from "./errors";
-import {Validator} from "./validator";
+import { NetworkError, UrlShortenerError } from "./errors";
+import { Validator } from "./validator";
 import * as process from "node:process";
-import {UserAgent} from "./version";
-import * as https from "node:https";
+import { UserAgent } from "./version";
 
 export class UrlShortenSDK {
     private client: AxiosInstance;
@@ -162,7 +161,7 @@ export class UrlShortenSDK {
      * @param newConfig - The new configuration
      */
     public updateConfig(newConfig: Partial<SdkConfig>): void {
-        this.config = {...this.config, ...newConfig};
+        this.config = { ...this.config, ...newConfig };
 
         if (newConfig.baseUrl) {
             this.client.defaults.baseURL = newConfig.baseUrl;
