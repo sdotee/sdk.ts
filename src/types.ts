@@ -3,6 +3,10 @@ export interface UrlShortenRequest {
     target_url: string;
     custom_slug?: string;
     title?: string;
+    expiration_redirect_url?: string;
+    expire_at?: string;
+    password?: string;
+    tag_ids?: number[];
 }
 
 export interface UrlShortenDeleteRequest {
@@ -20,11 +24,25 @@ export interface UrlShortenUpdateRequest {
 export interface UrlShortenResponse {
     code: number;
     message: string;
+
     data: {
+        custom_slug?: string;
         short_url: string;
         slug: string;
-        custom_slug?: string;
-    }
+    };
+}
+
+export interface Tag {
+    id: number;
+    name: string;
+}
+
+export interface TagsResponse {
+    code: number;
+    message: string;
+    data: {
+        tags: Tag[]
+    };
 }
 
 export interface DomainListResponse {

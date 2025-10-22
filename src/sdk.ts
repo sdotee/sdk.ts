@@ -3,6 +3,7 @@ import {
     ApiError,
     DomainListResponse,
     SdkConfig,
+    TagsResponse,
     UrlShortenDeleteRequest,
     UrlShortenRequest,
     UrlShortenResponse,
@@ -153,6 +154,29 @@ export class UrlShortenSDK {
                 throw error;
             }
             throw new NetworkError("Failed to fetch domains");
+        }
+    }
+
+    /**
+     * List Available Tags
+     */
+    async listTags(): Promise<TagsResponse> {
+
+        try {
+            const response: AxiosResponse<TagsResponse> = await this.client.get("/api/v1/tags");
+            if (response.data && response.status === HttpStatusCode.Ok) {
+                return response.data;
+            } else {
+                throw new UrlShortenerError({
+                    code: "API_ERROR",
+                    message: `Failed to fetch tags`,
+                });
+            }
+        } catch (error) {
+            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+                throw error;
+            }
+            throw new NetworkError("Failed to fetch tags");
         }
     }
 
