@@ -1,5 +1,5 @@
 {
-  "name": "typescript-sdk-for-sdotee",
+  "name": "see-sdk",
   "version": "1.0.0",
   "description": "A TypeScript SDK for s.ee which is a URL shortening and content sharing services",
   "main": "dist/index.js",
@@ -18,7 +18,14 @@
     "sdk",
     "typescript"
   ],
-  "author": "mingcheng <mingcheng@outlook.com>",
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "include": [
+    "src"
+  ],
+  "author": "mingcheng <mingcheng@apache.org>",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^30.0.0",
