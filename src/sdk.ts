@@ -1,5 +1,5 @@
 /*!*
- * Copyright (c) 2026 S.EE Development Team
+ * Copyright (c) 2025 S.EE Development Team
  *
  * This source code is licensed under the MIT License,
  * which is located in the LICENSE file in the source tree's root directory.
@@ -9,168 +9,208 @@
  * File Created: 2025-11-29 22:19:57
  *
  * Modified By: S.EE Development Team <dev@s.ee>
- * Last Modified: 2026-01-20 16:42:25
+ * Last Modified: 2025-12-04 17:10:00
  */
 
-import axios from 'axios';
-import type { AxiosInstance } from 'axios';
-import type {
-  ApiError,
-  DomainListResponse,
-  SdkConfig,
-  TagsResponse,
-  UrlShortenDeleteRequest,
-  UrlShortenRequest,
-  UrlShortenResponse,
-  UrlShortenUpdateRequest,
-} from './types';
-import { NetworkError, SeeServiceError } from './errors';
-import * as process from 'node:process';
-import { UserAgent } from './version';
-import { Url } from './resources/Url';
-import { Text } from './resources/Text';
-import { Files } from './resources/Files';
-import { Qrcode } from './resources/Qrcode';
-import { Bio } from './resources/Bio';
-import { Account } from './resources/Account';
+import axios, { AxiosInstance, AxiosResponse, HttpStatusCode } from "axios";
+import {
+    ApiError,
+    DomainListResponse,
+    SdkConfig,
+    TagsResponse,
+    UrlShortenDeleteRequest,
+    UrlShortenRequest,
+    UrlShortenResponse,
+    UrlShortenUpdateRequest,
+} from "./types";
+import { NetworkError, UrlShortenerError } from "./errors";
+import { Validator } from "./validator";
+import * as process from "node:process";
+import { UserAgent } from "./version";
 
-export class SeeSDK {
-  private client: AxiosInstance;
-  private config: SdkConfig;
+export class UrlShortenSDK {
+    private client: AxiosInstance;
+    private config: SdkConfig;
 
-  public url: Url;
-  public text: Text;
-  public file: Files;
-  public qrcode: Qrcode;
-  public bio: Bio;
-  public account: Account;
-
-  constructor(config: SdkConfig) {
-    if (config.baseUrl === undefined || config.baseUrl === '') {
-      const environmentBaseUrl = process.env.SEE_API_BASE;
-      config.baseUrl =
-        environmentBaseUrl === undefined || environmentBaseUrl === ''
-          ? 'https://s.ee/api/v1'
-          : environmentBaseUrl;
-    }
-
-    this.config = config;
-    this.client = axios.create({
-      baseURL: config.baseUrl,
-      timeout: config.timeout ?? 10000,
-      headers: {
-        Authorization: `${config.apiKey}`,
-        'Content-Type': 'application/json',
-        'User-Agent': UserAgent,
-      },
-    });
-
-    if (process.env.HTTP_PROXY !== undefined && process.env.HTTP_PROXY !== '') {
-      try {
-        const proxyUrl = new URL(process.env.HTTP_PROXY);
-        this.client.defaults.proxy = {
-          protocol: proxyUrl.protocol.replace(':', ''), // Remove the colon
-          host: proxyUrl.hostname,
-          port: parseInt(proxyUrl.port, 10),
-        };
-      } catch {
-        console.warn('Invalid proxy URL format:', process.env.HTTP_PROXY);
-      }
-    }
-
-    this.setupInterceptors();
-
-    this.url = new Url(this.client);
-    this.text = new Text(this.client);
-    this.file = new Files(this.client);
-    this.qrcode = new Qrcode(this.client);
-    this.bio = new Bio(this.client);
-    this.account = new Account(this.client);
-  }
-
-  private setupInterceptors(): void {
-    this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response) {
-          const apiError: ApiError = {
-            code: error.response.data?.code ?? 'UNKNOWN_ERROR',
-            message: error.response.data?.message ?? 'An unknown error occurred',
-          };
-          throw new SeeServiceError(apiError);
-        } else if (error.request) {
-          throw new NetworkError(error.message);
-        } else {
-          throw new NetworkError('Request configuration error');
+    constructor(config: SdkConfig) {
+        if (config.baseUrl === undefined || config.baseUrl === "") {
+            config.baseUrl = process.env.API_BASE_URL || "https://s.ee";
         }
-      },
-    );
-  }
 
-  /**
-   * Create a shortened URL
-   * @param request - The URL shortening request
-   * @returns Promise<UrlShortenResponse> - The shortened URL response
-   * @deprecated Use `sdk.url.create` instead
-   */
-  async create(request: UrlShortenRequest): Promise<UrlShortenResponse> {
-    return this.url.create(request);
-  }
+        this.config = config;
+        this.client = axios.create({
+            baseURL: config.baseUrl,
+            timeout: config.timeout || 10000,
+            headers: {
+                Authorization: `${config.apiKey}`,
+                "Content-Type": "application/json",
+                "User-Agent": UserAgent,
+            },
+        });
 
-  /**
-   * Delete a shortened URL
-   * @param request - The delete request
-   * @returns Promise<any>
-   * @deprecated Use `sdk.url.delete` instead
-   */
-  async delete(request: UrlShortenDeleteRequest): Promise<UrlShortenResponse> {
-    return this.url.delete(request);
-  }
+        if (process.env.HTTP_PROXY !== undefined && process.env.HTTP_PROXY != "") {
+            // this.client.defaults.httpsAgent = new https.Agent({
+            //     rejectUnauthorized: false
+            // });
 
-  /**
-   * Update a shortened URL
-   * @param request - The update request
-   * @returns Promise<any>
-   * @deprecated Use `sdk.url.update` instead
-   */
-  async update(request: UrlShortenUpdateRequest): Promise<UrlShortenResponse> {
-    return this.url.update(request);
-  }
+            // Parse proxy URL (e.g., http://127.0.0.1:1080)
+            try {
+                const proxyUrl = new URL(process.env.HTTP_PROXY);
+                this.client.defaults.proxy = {
+                    protocol: proxyUrl.protocol.replace(":", ""), // Remove the colon
+                    host: proxyUrl.hostname,
+                    port: parseInt(proxyUrl.port, 10),
+                };
+                console.log("Proxy configured:", this.client.defaults.proxy);
+            } catch (error) {
+                console.warn("Invalid proxy URL format:", process.env.HTTP_PROXY);
+            }
+        }
 
-  /**
-   * List available domains
-   * @returns Promise<DomainListResponse>
-   * @deprecated Use `sdk.url.listDomains` instead
-   */
-  async listDomains(): Promise<DomainListResponse> {
-    return this.url.listDomains();
-  }
-
-  /**
-   * List Available Tags
-   * @deprecated Use `sdk.url.listTags` instead
-   */
-  async listTags(): Promise<TagsResponse> {
-    return this.url.listTags();
-  }
-
-  /**
-   * Update the SDK configuration
-   * @param newConfig - The new configuration
-   */
-  public updateConfig(newConfig: Partial<SdkConfig>): void {
-    this.config = { ...this.config, ...newConfig };
-
-    if (newConfig.baseUrl) {
-      this.client.defaults.baseURL = newConfig.baseUrl;
+        this.setupInterceptors();
     }
 
-    if (newConfig.apiKey) {
-      this.client.defaults.headers['Authorization'] = `${newConfig.apiKey}`;
+    private setupInterceptors(): void {
+        this.client.interceptors.response.use(
+            (response: any) => response,
+            (error: any) => {
+                if (error.response) {
+                    const apiError: ApiError = {
+                        code: error.response.data?.code || "UNKNOWN_ERROR",
+                        message: error.response.data?.message || "An unknown error occurred",
+                    };
+                    throw new UrlShortenerError(apiError);
+                } else if (error.request) {
+                    throw new NetworkError(error.message);
+                } else {
+                    throw new NetworkError("Request configuration error");
+                }
+            }
+        );
     }
 
-    if (newConfig.timeout) {
-      this.client.defaults.timeout = newConfig.timeout;
+    /**
+     * Create a shortened URL
+     * @param request - The URL shortening request
+     * @returns Promise<UrlShortenResponse> - The shortened URL response
+     */
+    async create(request: UrlShortenRequest): Promise<UrlShortenResponse> {
+        // Validate input
+        Validator.validateUrl(request.target_url);
+
+        try {
+            const response: AxiosResponse<UrlShortenResponse> = await this.client.post("/api/v1/shorten", request);
+
+            if (!response) {
+                throw new UrlShortenerError({
+                    message: `Failed to create short URL, status code is not Ok`,
+                    code: "API_ERROR",
+                });
+            }
+
+            return {
+                ...response.data,
+            };
+        } catch (error) {
+            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+                throw error;
+            }
+            console.info(error);
+            throw new NetworkError("Failed to create short URL");
+        }
     }
-  }
+
+    /**
+     * Delete a shortened URL
+     * @returns Promise<DeleteUrlResponse> - The deletion response
+     * @param request
+     */
+    async delete(request: UrlShortenDeleteRequest): Promise<UrlShortenResponse> {
+        try {
+            const response: AxiosResponse<UrlShortenResponse> = await this.client.delete(`/api/v1/shorten`, {
+                data: request,
+            });
+            return response.data;
+        } catch (error) {
+            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+                throw error;
+            }
+            throw new NetworkError("Failed to delete short URL");
+        }
+    }
+
+    async update(request: UrlShortenUpdateRequest): Promise<UrlShortenResponse> {
+        try {
+            const response: AxiosResponse<UrlShortenResponse> = await this.client.put("/api/v1/shorten", request);
+            return response.data;
+        } catch (error) {
+            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+                throw error;
+            }
+
+            throw new NetworkError("Failed to update short URL");
+        }
+    }
+
+    async listDomains(): Promise<DomainListResponse> {
+        try {
+            const response: AxiosResponse<DomainListResponse> = await this.client.get("/api/v1/domains");
+            if (response.data && response.status === HttpStatusCode.Ok) {
+                return response.data;
+            } else {
+                throw new UrlShortenerError({
+                    code: "API_ERROR",
+                    message: `Failed to fetch domains`,
+                });
+            }
+        } catch (error) {
+            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+                throw error;
+            }
+            throw new NetworkError("Failed to fetch domains");
+        }
+    }
+
+    /**
+     * List Available Tags
+     */
+    async listTags(): Promise<TagsResponse> {
+
+        try {
+            const response: AxiosResponse<TagsResponse> = await this.client.get("/api/v1/tags");
+            if (response.data && response.status === HttpStatusCode.Ok) {
+                return response.data;
+            } else {
+                throw new UrlShortenerError({
+                    code: "API_ERROR",
+                    message: `Failed to fetch tags`,
+                });
+            }
+        } catch (error) {
+            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+                throw error;
+            }
+            throw new NetworkError("Failed to fetch tags");
+        }
+    }
+
+    /**
+     * Update the SDK configuration
+     * @param newConfig - The new configuration
+     */
+    public updateConfig(newConfig: Partial<SdkConfig>): void {
+        this.config = { ...this.config, ...newConfig };
+
+        if (newConfig.baseUrl) {
+            this.client.defaults.baseURL = newConfig.baseUrl;
+        }
+
+        if (newConfig.apiKey) {
+            this.client.defaults.headers["Authorization"] = `${newConfig.apiKey}`;
+        }
+
+        if (newConfig.timeout) {
+            this.client.defaults.timeout = newConfig.timeout;
+        }
+    }
 }
