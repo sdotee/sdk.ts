@@ -1,4 +1,4 @@
-import {UrlShortenSDK, ValidationError, NetworkError, UrlShortenerError, UrlShortenResponse} from '../src/index';
+import { SeeSDK, ValidationError, NetworkError, SeeServiceError, UrlShortenResponse } from '../src/index';
 import process from "node:process";
 
 // 示例：基本使用
@@ -6,7 +6,7 @@ async function basicExample() {
     console.log('=== 基本使用示例 ===');
 
     // 初始化 SDK
-    const sdk = new UrlShortenSDK({
+    const sdk = new SeeSDK({
         baseUrl: process.env.URL_SHORTENER_API_BASE || "https://s.ee",  // 这里应该是真实的API地址
         apiKey: process.env.URL_SHORTENER_API_KEY || "",
         timeout: 10000
@@ -61,7 +61,7 @@ async function basicExample() {
 async function errorHandlingExample() {
     console.log("\n=== 错误处理示例 ===");
 
-    const sdk = new UrlShortenSDK({
+    const sdk = new SeeSDK({
         baseUrl: 'https://api.example-shortener.com',
         apiKey: 'your-api-key-here'
     });
@@ -92,7 +92,7 @@ async function errorHandlingExample() {
     }
 
     // 网络错误示例（使用错误的 URL）
-    const badSdk = new UrlShortenSDK({
+    const badSdk = new SeeSDK({
         baseUrl: 'https://non-existent-api.com',
         apiKey: 'test-key'
     });
@@ -114,7 +114,7 @@ async function errorHandlingExample() {
 async function batchOperationExample() {
     console.log("\n=== 批量操作示例 ===");
 
-    const sdk = new UrlShortenSDK({
+    const sdk = new SeeSDK({
         baseUrl: process.env.URL_SHORTENER_API_BASE || "https://s.ee",  // 这里应该是真实的API地址
         apiKey: process.env.URL_SHORTENER_API_KEY || "",
         timeout: 10000
@@ -150,7 +150,7 @@ async function batchOperationExample() {
 async function configUpdateExample() {
     console.log("\n=== 配置更新示例 ===");
 
-    const sdk = new UrlShortenSDK({
+    const sdk = new SeeSDK({
         baseUrl: 'https://api.example-shortener.com',
         apiKey: 'initial-api-key',
         timeout: 5000
@@ -183,7 +183,7 @@ async function configUpdateExample() {
 async function retryExample() {
     console.log("\n=== 重试机制示例 ===");
 
-    const sdk = new UrlShortenSDK({
+    const sdk = new SeeSDK({
         baseUrl: 'https://api.example-shortener.com',
         apiKey: 'your-api-key-here'
     });

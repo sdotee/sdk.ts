@@ -1,16 +1,16 @@
 #!/usr/bin/env ts-node
 
-import {UrlShortenSDK, ValidationError, NetworkError, UrlShortenerError} from '../src';
+import { SeeSDK, ValidationError, NetworkError, SeeServiceError } from '../src';
 import * as process from "node:process";
 
 /**
  * 演示如何使用 URL 缩短 SDK
  */
 async function demo() {
-    console.log('🚀 SEE URL Shortener SDK 演示\n');
+    console.log('🚀 SEE SDK 演示\n');
 
     // 初始化 SDK
-    const sdk = new UrlShortenSDK({
+    const sdk = new SeeSDK({
         baseUrl: process.env.URL_SHORTENER_API_BASE || "https://s.ee",  // 这里应该是真实的API地址
         apiKey: process.env.URL_SHORTENER_API_KEY || "",
         timeout: 10000
@@ -46,7 +46,7 @@ async function demo() {
 /**
  * 创建基本短链接
  */
-async function createBasicShortUrl(sdk: UrlShortenSDK) {
+async function createBasicShortUrl(sdk: SeeSDK) {
     return await sdk.create({
         target_url: 'https://github.com/typescript-tutorial/typescript-tutorial',
         domain: 's.ee',
@@ -56,7 +56,7 @@ async function createBasicShortUrl(sdk: UrlShortenSDK) {
 /**
  * 创建自定义代码的短链接
  */
-async function createCustomShortUrl(sdk: UrlShortenSDK) {
+async function createCustomShortUrl(sdk: SeeSDK) {
     try {
         await sdk.delete({
             domain: 's.ee',
@@ -82,7 +82,7 @@ async function createCustomShortUrl(sdk: UrlShortenSDK) {
 /**
  * 演示错误处理
  */
-async function demonstrateErrorHandling(sdk: UrlShortenSDK) {
+async function demonstrateErrorHandling(sdk: SeeSDK) {
     // 测试 1: 无效的URL
     console.log('   测试无效URL...');
     try {
@@ -132,7 +132,7 @@ function handleError(error: any) {
         if (error.statusCode) {
             console.log('   状态码:', error.statusCode);
         }
-    } else if (error instanceof UrlShortenerError) {
+    } else if (error instanceof SeeServiceError) {
         console.log('❌ API 错误:', error.message);
         console.log('   错误代码:', error.code);
         if (error.details) {
@@ -146,7 +146,7 @@ function handleError(error: any) {
 /**
  * 配置更新演示
  */
-function demonstrateConfigUpdate(sdk: UrlShortenSDK) {
+function demonstrateConfigUpdate(sdk: SeeSDK) {
     console.log('\n🔧 演示配置更新');
 
     // 更新部分配置
