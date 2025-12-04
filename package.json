@@ -1,22 +1,15 @@
 {
   "name": "see-sdk",
-  "version": "1.2.0",
-  "description": "A TypeScript SDK for s.ee which is a content sharing service",
+  "version": "1.0.0",
+  "description": "A TypeScript SDK for s.ee which is a URL shortening and content sharing services",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest",
-    "api:check": "jest --runInBand src/__tests__/api-sync.test.ts",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
     "dev": "ts-node src/index.ts",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
-    "format:check": "prettier --check 'src/**/*.ts'",
-    "format": "prettier --write 'src/**/*.ts'",
-    "validate": "pnpm run lint && pnpm run api:check && pnpm run test && pnpm run build",
-    "prepublishOnly": "pnpm run validate"
+    "lint": "eslint src/**/*.ts"
   },
   "keywords": [
     "see-sdk",
@@ -26,27 +19,27 @@
     "service",
     "api"
   ],
-  "files": [
+  "exclude": [
+    "node_modules",
     "dist"
+  ],
+  "include": [
+    "src"
   ],
   "author": "mingcheng <mingcheng@apache.org>",
   "license": "MIT",
-  "packageManager": "pnpm@10.14.0",
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.10.9",
-    "@typescript-eslint/eslint-plugin": "^8.53.1",
-    "@typescript-eslint/parser": "^8.53.1",
-    "eslint": "^9.39.2",
+    "@types/node": "^24.9.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
     "jest": "^30.2.0",
-    "prettier": "^3.8.0",
-    "ts-jest": "^29.4.6",
+    "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.53.1"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "axios": "^1.13.2"
+    "axios": "^1.12.2"
   }
 }
