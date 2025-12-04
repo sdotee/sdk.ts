@@ -14,13 +14,13 @@
 
 import {ApiError} from './types';
 
-export class UrlShortenerError extends Error {
+export class SeeServiceError extends Error {
     public readonly code: string;
     public readonly details?: any;
 
     constructor(error: ApiError) {
         super(error.message);
-        this.name = 'UrlShortenerError';
+        this.name = 'SeeServiceError';
         this.code = error.code;
         this.details = error.data || "No additional details provided";
     }

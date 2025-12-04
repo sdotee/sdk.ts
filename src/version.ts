@@ -9,8 +9,8 @@
  * File Created: 2025-07-03 16:15:36
  *
  * Modified By: S.EE Development Team <dev@s.ee>
- * Last Modified: 2025-12-04 17:08:59
+ * Last Modified: 2025-12-04 17:23:22
  */
 
 export const Version = "1.0.0";
-export const UserAgent = `See-SDK/${Version}`;
+export const UserAgent = `S.EE-TypeScript-SDK/${Version}`;
