@@ -12,7 +12,7 @@
  * Last Modified: 2025-12-04 17:10:02
  */
 
-export {UrlShortenSDK} from './sdk';
+export { SeeSDK } from './sdk';
 export {
     UrlShortenRequest,
     UrlShortenResponse,
@@ -20,7 +20,7 @@ export {
     ApiError
 } from './types';
 export {
-    UrlShortenerError,
+    SeeServiceError,
     ValidationError,
     NetworkError
 } from './errors';

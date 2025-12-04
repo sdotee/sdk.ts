@@ -47,7 +47,7 @@ try {
     custom_slug: 'my-link', // Optional
     title: 'My Link' // Optional
   });
-  
+
   console.log('Short URL created:', result.data.short_url);
   console.log('Slug:', result.data.slug);
 } catch (error) {

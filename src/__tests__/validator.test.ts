@@ -23,7 +23,7 @@ describe('Validator', () => {
         });
 
         it('should throw error for too long URLs', () => {
-            const longUrl = 'https://example.com/' + 'a'.repeat(2050);
+            const longUrl = `https://example.com/${  'a'.repeat(2050)}`;
             expect(() => Validator.validateUrl(longUrl)).toThrow(ValidationError);
         });
     });
