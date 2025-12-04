@@ -1,5 +1,5 @@
-import {UrlShortenSDK} from "../sdk";
-import {UrlShortenerError, NetworkError, ValidationError} from "../errors";
+import { SeeSDK } from "../sdk";
+import { ValidationError } from "../errors";
 import {UserAgent} from "../version";
 
 import axios from "axios";
@@ -27,8 +27,8 @@ const mockAxiosInstance = {
 
 mockedAxios.create = jest.fn(() => mockAxiosInstance as any);
 
-describe("UrlShortenerSDK", () => {
-    let sdk: UrlShortenSDK;
+describe("SeeSDK", () => {
+    let sdk: SeeSDK;
     const config = {
         baseUrl: process.env.URL_SHORTENER_API_BASE || "https://s.ee",
         apiKey: process.env.URL_SHORTENER_API_KEY || "",
@@ -61,7 +61,7 @@ describe("UrlShortenerSDK", () => {
         mockedAxios.create.mockReturnValue(freshMockAxiosInstance as any);
         Object.assign(mockAxiosInstance, freshMockAxiosInstance);
 
-        sdk = new UrlShortenSDK(config);
+        sdk = new SeeSDK(config);
     });
 
     describe("constructor", () => {
@@ -83,7 +83,7 @@ describe("UrlShortenerSDK", () => {
                 apiKey: "test-api-key",
             };
 
-            new UrlShortenSDK(configWithoutTimeout);
+            new SeeSDK(configWithoutTimeout);
 
             expect(mockedAxios.create).toHaveBeenCalledWith({
                 baseURL: configWithoutTimeout.baseUrl,
@@ -115,26 +115,26 @@ describe("UrlShortenerSDK", () => {
             };
 
             mockAxiosInstance.post.mockResolvedValue(mockResponse);
-            const result = await sdk.create(request);
+            const _result = await sdk.create(request);
 
             expect(mockAxiosInstance.post).toHaveBeenCalledWith("/api/v1/shorten", request);
             // expect(result).toEqual(mockResponse);
         });
 
         it("should throw validation error for invalid URL", async () => {
-            const request = {target_url: "invalid-url", domain: "2.sb"};
+            const _request = { target_url: "invalid-url", domain: "2.sb" };
 
-            await expect(sdk.create(request)).rejects.toThrow(ValidationError);
+            await expect(sdk.create(_request)).rejects.toThrow(ValidationError);
             expect(mockAxiosInstance.post).not.toHaveBeenCalled();
         });
 
         it("should throw validation error for invalid custom code", async () => {
-            const request = {
+            const _request = {
                 target_url: "https://example.com",
                 domain: "ab", // Too short
             };
 
-            // await expect(sdk.create(request)).rejects.toThrow(ValidationError);
+            // await expect(sdk.create(_request)).rejects.toThrow(ValidationError);
             expect(mockAxiosInstance.post).not.toHaveBeenCalled();
         });
     });

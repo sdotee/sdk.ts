@@ -1,7 +1,7 @@
-import { UrlShortenerError, ValidationError, NetworkError } from '../errors';
+import { SeeServiceError, ValidationError, NetworkError } from '../errors';
 
 describe('Errors', () => {
-    describe('UrlShortenerError', () => {
+    describe('SeeServiceError', () => {
         it('should create error with correct properties', () => {
             const apiError = {
                 code: 'INVALID_URL',
@@ -9,9 +9,9 @@ describe('Errors', () => {
                 details: { url: 'invalid-url' }
             };
 
-            const error = new UrlShortenerError(apiError);
+            const error = new SeeServiceError(apiError);
 
-            expect(error.name).toBe('UrlShortenerError');
+            expect(error.name).toBe('SeeServiceError');
             expect(error.message).toBe('The provided URL is invalid');
             expect(error.code).toBe('INVALID_URL');
             // expect(error.details).toEqual({ url: 'invalid-url' });

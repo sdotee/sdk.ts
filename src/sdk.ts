@@ -23,12 +23,12 @@ import {
     UrlShortenResponse,
     UrlShortenUpdateRequest,
 } from "./types";
-import { NetworkError, UrlShortenerError } from "./errors";
+import { NetworkError, SeeServiceError } from "./errors";
 import { Validator } from "./validator";
 import * as process from "node:process";
 import { UserAgent } from "./version";
 
-export class UrlShortenSDK {
+export class SeeSDK {
     private client: AxiosInstance;
     private config: SdkConfig;
 
@@ -79,7 +79,7 @@ export class UrlShortenSDK {
                         code: error.response.data?.code || "UNKNOWN_ERROR",
                         message: error.response.data?.message || "An unknown error occurred",
                     };
-                    throw new UrlShortenerError(apiError);
+                    throw new SeeServiceError(apiError);
                 } else if (error.request) {
                     throw new NetworkError(error.message);
                 } else {
@@ -102,7 +102,7 @@ export class UrlShortenSDK {
             const response: AxiosResponse<UrlShortenResponse> = await this.client.post("/api/v1/shorten", request);
 
             if (!response) {
-                throw new UrlShortenerError({
+                throw new SeeServiceError({
                     message: `Failed to create short URL, status code is not Ok`,
                     code: "API_ERROR",
                 });
@@ -112,7 +112,7 @@ export class UrlShortenSDK {
                 ...response.data,
             };
         } catch (error) {
-            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+            if (error instanceof SeeServiceError || error instanceof NetworkError) {
                 throw error;
             }
             console.info(error);
@@ -132,10 +132,10 @@ export class UrlShortenSDK {
             });
             return response.data;
         } catch (error) {
-            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+            if (error instanceof SeeServiceError || error instanceof NetworkError) {
                 throw error;
             }
-            throw new NetworkError("Failed to delete short URL");
+            throw new NetworkError("Failed to update short URL");
         }
     }
 
@@ -144,7 +144,7 @@ export class UrlShortenSDK {
             const response: AxiosResponse<UrlShortenResponse> = await this.client.put("/api/v1/shorten", request);
             return response.data;
         } catch (error) {
-            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+            if (error instanceof SeeServiceError || error instanceof NetworkError) {
                 throw error;
             }
 
@@ -158,13 +158,13 @@ export class UrlShortenSDK {
             if (response.data && response.status === HttpStatusCode.Ok) {
                 return response.data;
             } else {
-                throw new UrlShortenerError({
+                throw new SeeServiceError({
                     code: "API_ERROR",
                     message: `Failed to fetch domains`,
                 });
             }
         } catch (error) {
-            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+            if (error instanceof SeeServiceError || error instanceof NetworkError) {
                 throw error;
             }
             throw new NetworkError("Failed to fetch domains");
@@ -181,13 +181,13 @@ export class UrlShortenSDK {
             if (response.data && response.status === HttpStatusCode.Ok) {
                 return response.data;
             } else {
-                throw new UrlShortenerError({
+                throw new SeeServiceError({
                     code: "API_ERROR",
                     message: `Failed to fetch tags`,
                 });
             }
         } catch (error) {
-            if (error instanceof UrlShortenerError || error instanceof NetworkError) {
+            if (error instanceof SeeServiceError || error instanceof NetworkError) {
                 throw error;
             }
             throw new NetworkError("Failed to fetch tags");
