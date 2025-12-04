@@ -1,56 +1,45 @@
-# See URL Shortener SDK
+# S.EE Typescript SDK
 
-A TypeScript-based SDK for the See URL shortener service, providing a complete API wrapper.
+A TypeScript SDK for the S.EE service platform with support for URL shortening and more.
 
-## Features
-
-- ✅ Create short URLs (supports custom domains and slugs)
-- ✅ Delete short URLs
-- ✅ Update short URLs (change target URL and title)
-- ✅ List available domains
-- ✅ Full TypeScript type support
-- ✅ Input validation
-- ✅ Error handling and retry mechanism
-- ✅ Configurable HTTP client
-- ✅ Comprehensive unit tests
-- ✅ Environment variable configuration
 
 ## Installation
 
 ```bash
-npm install url-shortener-sdk
+npm i see-sdk
 # or
-pnpm install url-shortener-sdk
+pnpm i see-sdk
 ```
+
+For more information, visit the npm page: https://www.npmjs.com/package/see-sdk
 
 ## Quick Start
 
-### Basic Usage
-
 ```typescript
-import { UrlShortenSDK } from 'url-shortener-sdk';
+import { SeeSDK } from 'see-sdk';
 
-// Initialize SDK
-const sdk = new UrlShortenSDK({
-  baseUrl: 'https://s.ee', // Default value, optional
-  apiKey: 'your-api-key',
-  timeout: 10000 // Optional, default is 10 seconds
-});
-
-// Or use environment variable (API_BASE_URL)
-const sdk = new UrlShortenSDK({
+const sdk = new SeeSDK({
+  baseUrl: 'https://s.ee',
   apiKey: 'your-api-key'
 });
+```
 
-// List available domains
+### URL Shortener Module
+
+#### List Available Domains
+
+```typescript
 try {
   const domains = await sdk.listDomains();
   console.log('Available domains:', domains.data.domains);
 } catch (error) {
   console.error('Failed to get domains:', error.message);
 }
+```
 
-// Create short URL
+#### Create Short URL
+
+```typescript
 try {
   const result = await sdk.create({
     domain: 'ba.sh',
@@ -64,8 +53,11 @@ try {
 } catch (error) {
   console.error('Creation failed:', error.message);
 }
+```
 
-// Update short URL
+#### Update Short URL
+
+```typescript
 try {
   const result = await sdk.update({
     domain: 'ba.sh',
@@ -77,8 +69,11 @@ try {
 } catch (error) {
   console.error('Update failed:', error.message);
 }
+```
 
-// Delete short URL
+#### Delete Short URL
+
+```typescript
 try {
   const result = await sdk.delete({
     domain: 'ba.sh',
@@ -92,23 +87,23 @@ try {
 
 ## API Reference
 
-### UrlShortenSDK
+### SeeSDK
 
 #### Constructor
 
 ```typescript
-new UrlShortenSDK(config: SdkConfig)
+new SeeSDK(config: SdkConfig)
 ```
 
-**SdkConfig Parameters:**
+**Parameters:**
 
-| Name    | Type   | Required | Description                          |
-| ------- | ------ | -------- | ------------------------------------ |
-| baseUrl | string | No       | API base URL, default 'https://s.ee' |
-| apiKey  | string | Yes      | API key                              |
-| timeout | number | No       | Request timeout (ms), default 10000  |
+| Name    | Type   | Default        |
+| ------- | ------ | -------------- |
+| baseUrl | string | 'https://s.ee' |
+| apiKey  | string | Required       |
+| timeout | number | 10000          |
 
-#### Methods
+#### Methods - URL Shortener Module
 
 ##### create(request: UrlShortenRequest): Promise<UrlShortenResponse>
 
@@ -186,244 +181,72 @@ Update SDK configuration.
 
 ## Error Handling
 
-The SDK provides three main error types:
-
-### ValidationError
-
-Input validation error, thrown when parameters are invalid.
-
 ```typescript
-import { ValidationError } from 'url-shortener-sdk';
+import { ValidationError, NetworkError, SeeServiceError } from 'see-sdk';
 
 try {
-  await sdk.create({ 
-    domain: 'ba.sh',
-    target_url: 'invalid-url' 
-  });
+  await sdk.create({ domain: 'ba.sh', target_url: 'https://example.com' });
 } catch (error) {
   if (error instanceof ValidationError) {
     console.log('Validation error:', error.message);
-  }
-}
-```
-
-### NetworkError
-
-Network request error, thrown when connection fails or times out.
-
-```typescript
-import { NetworkError } from 'url-shortener-sdk';
-
-try {
-  await sdk.create({ 
-    domain: 'ba.sh',
-    target_url: 'https://example.com' 
-  });
-} catch (error) {
-  if (error instanceof NetworkError) {
+  } else if (error instanceof NetworkError) {
     console.log('Network error:', error.message);
-    console.log('Status code:', error.statusCode); // May be undefined
-  }
-}
-```
-
-### UrlShortenerError
-
-API error, thrown when the server returns an error response.
-
-```typescript
-import { UrlShortenerError } from 'url-shortener-sdk';
-
-try {
-  await sdk.create({ 
-    domain: 'ba.sh',
-    target_url: 'https://example.com' 
-  });
-} catch (error) {
-  if (error instanceof UrlShortenerError) {
+  } else if (error instanceof SeeServiceError) {
     console.log('API error:', error.message);
-    console.log('Error code:', error.code);
-    console.log('Error details:', error.details);
   }
 }
 ```
 
-## Advanced Usage
+## Examples
 
-### Environment Variable Configuration
-
-SDK supports configuration via environment variables:
-
-```bash
-# .env file
-API_BASE_URL=https://s.ee
-API_KEY=your-api-key
-```
+### Batch Operations
 
 ```typescript
-// When using environment variables, only provide apiKey
-const sdk = new UrlShortenSDK({
-  apiKey: process.env.API_KEY || 'your-api-key'
-});
-```
-
-### Dynamic Configuration Update
-
-```typescript
-const sdk = new UrlShortenSDK({
-  baseUrl: 'https://s.ee',
-  apiKey: 'initial-key'
-});
-
-// Update config later
-sdk.updateConfig({
-  apiKey: 'new-api-key',
-  timeout: 15000
-});
-```
-
-### Batch Operation Example
-
-```typescript
-async function createMultipleUrls(urls: { domain: string, target_url: string, title?: string }[]) {
-  const results = [];
-  
-  for (const urlData of urls) {
-    try {
-      const result = await sdk.create(urlData);
-      results.push(result);
-    } catch (error) {
-      console.error(`Failed to create ${urlData.target_url}:`, error.message);
-    }
-  }
-  
-  return results;
-}
-
-// Usage example
-const urlsToShorten = [
-  { domain: 'ba.sh', target_url: 'https://example1.com', title: 'Example 1' },
-  { domain: 'ba.sh', target_url: 'https://example2.com', title: 'Example 2' },
-  { domain: 'ba.sh', target_url: 'https://example3.com', title: 'Example 3' }
+const urls = [
+  { domain: 'ba.sh', target_url: 'https://example1.com' },
+  { domain: 'ba.sh', target_url: 'https://example2.com' }
 ];
 
-const results = await createMultipleUrls(urlsToShorten);
-```
-
-### Complete Workflow Example
-
-```typescript
-async function completeWorkflow() {
-  // 1. Get available domains
-  const domains = await sdk.listDomains();
-  const availableDomain = domains.data.domains[0];
-  
-  // 2. Create short URL
-  const createResult = await sdk.create({
-    domain: availableDomain,
-    target_url: 'https://example.com',
-    custom_slug: 'my-link',
-    title: 'My Example Link'
-  });
-  
-  console.log('Created:', createResult.data.short_url);
-  
-  // 3. Update short URL
-  const updateResult = await sdk.update({
-    domain: availableDomain,
-    slug: createResult.data.slug,
-    target_url: 'https://updated-example.com',
-    title: 'Updated Title'
-  });
-  
-  console.log('Updated:', updateResult.data.short_url);
-  
-  // 4. Delete short URL
-  const deleteResult = await sdk.delete({
-    domain: availableDomain,
-    slug: createResult.data.slug
-  });
-  
-  console.log('Deleted:', deleteResult.message);
-}
-```
-
-### Error Retry Mechanism
-
-```typescript
-async function createWithRetry(
-  request: { domain: string, target_url: string, title?: string }, 
-  maxRetries = 3
-) {
-  let lastError;
-  
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await sdk.create(request);
-    } catch (error) {
-      lastError = error;
-      
-      if (error instanceof ValidationError) {
-        // No retry for validation errors
-        throw error;
-      }
-      
-      if (i < maxRetries - 1) {
-        // Wait and retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
-      }
-    }
+for (const url of urls) {
+  try {
+    const result = await sdk.create(url);
+    console.log('Created:', result.data.short_url);
+  } catch (error) {
+    console.error('Failed:', error.message);
   }
-  
-  throw lastError;
 }
 ```
 
-## Development
+### Complete Workflow
 
-### Install dependencies
+```typescript
+const domain = 'ba.sh';
 
-```bash
-pnpm install
+// Create
+const created = await sdk.create({
+  domain,
+  target_url: 'https://example.com',
+  custom_slug: 'my-link'
+});
+
+// Update
+const updated = await sdk.update({
+  domain,
+  slug: created.data.slug,
+  target_url: 'https://new-target.com'
+});
+
+// Delete
+await sdk.delete({ domain, slug: created.data.slug });
 ```
 
-### Run tests
+## Architecture
 
-```bash
-pnpm test
-```
-
-### Watch mode tests
-
-```bash
-pnpm test:watch
-```
-
-### Build
-
-```bash
-pnpm run build
-```
-
-### Lint
-
-```bash
-pnpm run lint
-```
-
-### Development mode
-
-```bash
-pnpm run dev
-```
-
-## Type Definitions
-
-All TypeScript type definitions are included in the package. No need to install extra type packages.
+Modular design for easy addition of new service modules. Includes full TypeScript type definitions.
 
 ## License
 
-MIT
+This repository is licensed under the MIT License, for more information, see the LICENSE file.
 
 ## Contributing
 
@@ -432,11 +255,6 @@ Issues and Pull Requests are welcome!
 ## Changelog
 
 ### 1.0.0
-- Initial release
-- Support for creating, deleting, and updating short URLs
-- Support for listing available domains
-- Full TypeScript support
-- Input validation and error handling
-- Support for custom domains and slugs
-- Environment variable configuration
-- Comprehensive unit test coverage
+- Initial S.EE SDK release
+- URL Shortener module with CRUD operations
+- Full TypeScript support with validation and error handling

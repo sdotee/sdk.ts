@@ -9,14 +9,15 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "dev": "ts-node src/index.ts",
-    "lint": "eslint src/**/*.ts",
-    "prepare": "npm run build"
+    "lint": "eslint src/**/*.ts"
   },
   "keywords": [
-    "url",
-    "shortener",
+    "see-sdk",
+    "url-shortener",
     "sdk",
-    "typescript"
+    "typescript",
+    "service",
+    "api"
   ],
   "exclude": [
     "node_modules",
