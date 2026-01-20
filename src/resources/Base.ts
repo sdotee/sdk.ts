@@ -8,12 +8,12 @@
  * Author: S.EE Development Team <dev@s.ee>
  */
 
-import type { AxiosInstance } from 'axios';
+import { AxiosInstance } from "axios";
 
 export abstract class BaseResource {
-  protected client: AxiosInstance;
+    protected client: AxiosInstance;
 
-  constructor(client: AxiosInstance) {
-    this.client = client;
-  }
+    constructor(client: AxiosInstance) {
+        this.client = client;
+    }
 }
