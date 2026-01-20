@@ -1,7 +1,7 @@
 {
   "name": "see-sdk",
-  "version": "1.1.0",
-  "description": "A TypeScript SDK for s.ee which is a URL shortening and content sharing services",
+  "version": "1.1.1",
+  "description": "A TypeScript SDK for s.ee which is a content sharing service",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -34,20 +34,20 @@
   "author": "mingcheng <mingcheng@apache.org>",
   "license": "MIT",
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^9.39.2",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.9.1",
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
-    "@typescript-eslint/parser": "^8.46.2",
-    "eslint": "^9.38.0",
+    "@types/node": "^24.10.9",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "eslint": "^9.39.2",
     "jest": "^30.2.0",
-    "prettier": "^3.7.4",
-    "ts-jest": "^29.4.5",
+    "prettier": "^3.8.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.1"
+    "typescript-eslint": "^8.53.1"
   },
   "dependencies": {
-    "axios": "^1.12.2"
+    "axios": "^1.13.2"
   }
 }
