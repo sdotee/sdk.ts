@@ -8,7 +8,7 @@
  * Author: S.EE Development Team <dev@s.ee>
  */
 
-import { AxiosInstance } from "axios";
+import type { AxiosInstance } from "axios";
 
 export abstract class BaseResource {
     protected client: AxiosInstance;
