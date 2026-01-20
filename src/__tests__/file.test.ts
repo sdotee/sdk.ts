@@ -1,6 +1,5 @@
 import { SeeSDK } from "../sdk";
 import axios from "axios";
-import { UserAgent } from "../version";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;

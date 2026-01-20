@@ -9,7 +9,7 @@
  */
 
 import { BaseResource } from "./Base";
-import {
+import type {
     TextCreateRequest,
     TextCreateResponse,
     TextUpdateRequest,

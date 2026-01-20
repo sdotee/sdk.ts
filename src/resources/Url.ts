@@ -8,9 +8,10 @@
  * Author: S.EE Development Team <dev@s.ee>
  */
 
-import { AxiosResponse, HttpStatusCode } from "axios";
+import type { AxiosResponse} from "axios";
+import { HttpStatusCode } from "axios";
 import { BaseResource } from "./Base";
-import {
+import type {
     UrlShortenRequest,
     UrlShortenResponse,
     UrlShortenDeleteRequest,
