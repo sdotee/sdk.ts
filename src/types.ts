@@ -83,3 +83,89 @@ export interface ApiError {
     message: string;
     data?: string;
 }
+
+// Text Sharing Types
+
+export interface TextCreateRequest {
+    content: string;
+    title?: string;
+}
+
+export interface TextResponseData {
+    custom_slug: string;
+    short_url: string;
+    slug: string;
+}
+
+export interface TextCreateResponse {
+    code: number;
+    data: TextResponseData;
+    message: string;
+}
+
+export interface TextUpdateRequest {
+    content: string;
+    domain: string;
+    slug: string;
+    title?: string;
+}
+
+export interface TextDeleteRequest {
+    domain: string;
+    slug: string;
+}
+
+export interface TextActionResponse {
+    code: number;
+    data: {
+        code: number;
+        data: {
+            tags: Tag[]
+        };
+        message: string;
+    };
+    message: string;
+}
+
+export interface TextDomainListResponse {
+    code: number;
+    data: {
+        domains: string[];
+    };
+    message: string;
+}
+
+// File Sharing Types
+
+export interface FileUploadResponse {
+    code: number;
+    data: {
+        delete: string;
+        file_id: number;
+        filename: string;
+        hash: string;
+        height: number;
+        page: string;
+        path: string;
+        size: number;
+        storename: string;
+        upload_status: number;
+        url: string;
+        width: number;
+    };
+    message: string;
+}
+
+export interface FileDeleteResponse {
+    code: string;
+    message: string;
+    success: boolean;
+}
+
+export interface FileDomainListResponse {
+    code: number;
+    data: {
+        domains: string[];
+    };
+    message: string;
+}

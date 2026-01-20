@@ -1,5 +1,5 @@
 /*!*
- * Copyright (c) 2025 S.EE Development Team
+ * Copyright (c) 2026 S.EE Development Team
  *
  * This source code is licensed under the MIT License,
  * which is located in the LICENSE file in the source tree's root directory.
@@ -9,10 +9,10 @@
  * File Created: 2025-11-29 22:19:57
  *
  * Modified By: S.EE Development Team <dev@s.ee>
- * Last Modified: 2025-12-04 17:10:00
+ * Last Modified: 2026-01-20 16:42:25
  */
 
-import axios, { AxiosInstance, AxiosResponse, HttpStatusCode } from "axios";
+import axios, { AxiosInstance } from "axios";
 import {
     ApiError,
     DomainListResponse,
@@ -24,17 +24,23 @@ import {
     UrlShortenUpdateRequest,
 } from "./types";
 import { NetworkError, SeeServiceError } from "./errors";
-import { Validator } from "./validator";
 import * as process from "node:process";
 import { UserAgent } from "./version";
+import { Url } from "./resources/Url";
+import { Text } from "./resources/Text";
+import { Files } from "./resources/Files";
 
 export class SeeSDK {
     private client: AxiosInstance;
     private config: SdkConfig;
 
+    public url: Url;
+    public text: Text;
+    public file: Files;
+
     constructor(config: SdkConfig) {
         if (config.baseUrl === undefined || config.baseUrl === "") {
-            config.baseUrl = process.env.API_BASE_URL || "https://s.ee";
+            config.baseUrl = process.env.SEE_API_BASE || "https://s.ee/api/v1";
         }
 
         this.config = config;
@@ -49,11 +55,6 @@ export class SeeSDK {
         });
 
         if (process.env.HTTP_PROXY !== undefined && process.env.HTTP_PROXY != "") {
-            // this.client.defaults.httpsAgent = new https.Agent({
-            //     rejectUnauthorized: false
-            // });
-
-            // Parse proxy URL (e.g., http://127.0.0.1:1080)
             try {
                 const proxyUrl = new URL(process.env.HTTP_PROXY);
                 this.client.defaults.proxy = {
@@ -68,6 +69,10 @@ export class SeeSDK {
         }
 
         this.setupInterceptors();
+
+        this.url = new Url(this.client);
+        this.text = new Text(this.client);
+        this.file = new Files(this.client);
     }
 
     private setupInterceptors(): void {
@@ -93,105 +98,47 @@ export class SeeSDK {
      * Create a shortened URL
      * @param request - The URL shortening request
      * @returns Promise<UrlShortenResponse> - The shortened URL response
+     * @deprecated Use `sdk.url.create` instead
      */
     async create(request: UrlShortenRequest): Promise<UrlShortenResponse> {
-        // Validate input
-        Validator.validateUrl(request.target_url);
-
-        try {
-            const response: AxiosResponse<UrlShortenResponse> = await this.client.post("/api/v1/shorten", request);
-
-            if (!response) {
-                throw new SeeServiceError({
-                    message: `Failed to create short URL, status code is not Ok`,
-                    code: "API_ERROR",
-                });
-            }
-
-            return {
-                ...response.data,
-            };
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-            console.info(error);
-            throw new NetworkError("Failed to create short URL");
-        }
+        return this.url.create(request);
     }
 
     /**
      * Delete a shortened URL
-     * @returns Promise<DeleteUrlResponse> - The deletion response
-     * @param request
+     * @param request - The delete request
+     * @returns Promise<any>
+     * @deprecated Use `sdk.url.delete` instead
      */
     async delete(request: UrlShortenDeleteRequest): Promise<UrlShortenResponse> {
-        try {
-            const response: AxiosResponse<UrlShortenResponse> = await this.client.delete(`/api/v1/shorten`, {
-                data: request,
-            });
-            return response.data;
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-            throw new NetworkError("Failed to update short URL");
-        }
+        return this.url.delete(request);
     }
 
+    /**
+     * Update a shortened URL
+     * @param request - The update request
+     * @returns Promise<any>
+     * @deprecated Use `sdk.url.update` instead
+     */
     async update(request: UrlShortenUpdateRequest): Promise<UrlShortenResponse> {
-        try {
-            const response: AxiosResponse<UrlShortenResponse> = await this.client.put("/api/v1/shorten", request);
-            return response.data;
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-
-            throw new NetworkError("Failed to update short URL");
-        }
+        return this.url.update(request);
     }
 
+    /**
+     * List available domains
+     * @returns Promise<DomainListResponse>
+     * @deprecated Use `sdk.url.listDomains` instead
+     */
     async listDomains(): Promise<DomainListResponse> {
-        try {
-            const response: AxiosResponse<DomainListResponse> = await this.client.get("/api/v1/domains");
-            if (response.data && response.status === HttpStatusCode.Ok) {
-                return response.data;
-            } else {
-                throw new SeeServiceError({
-                    code: "API_ERROR",
-                    message: `Failed to fetch domains`,
-                });
-            }
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-            throw new NetworkError("Failed to fetch domains");
-        }
+        return this.url.listDomains();
     }
 
     /**
      * List Available Tags
+     * @deprecated Use `sdk.url.listTags` instead
      */
     async listTags(): Promise<TagsResponse> {
-
-        try {
-            const response: AxiosResponse<TagsResponse> = await this.client.get("/api/v1/tags");
-            if (response.data && response.status === HttpStatusCode.Ok) {
-                return response.data;
-            } else {
-                throw new SeeServiceError({
-                    code: "API_ERROR",
-                    message: `Failed to fetch tags`,
-                });
-            }
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-            throw new NetworkError("Failed to fetch tags");
-        }
+        return this.url.listTags();
     }
 
     /**
