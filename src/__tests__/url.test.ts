@@ -30,8 +30,8 @@ mockedAxios.create = jest.fn(() => mockAxiosInstance as any);
 describe("SeeSDK", () => {
     let sdk: SeeSDK;
     const config = {
-        baseUrl: process.env.URL_SHORTENER_API_BASE || "https://s.ee",
-        apiKey: process.env.URL_SHORTENER_API_KEY || "",
+        baseUrl: process.env.SEE_API_BASE || "https://s.ee",
+        apiKey: process.env.SEE_API_KEY || "",
         timeout: 5000,
     };
 
@@ -117,7 +117,7 @@ describe("SeeSDK", () => {
             mockAxiosInstance.post.mockResolvedValue(mockResponse);
             const _result = await sdk.create(request);
 
-            expect(mockAxiosInstance.post).toHaveBeenCalledWith("/api/v1/shorten", request);
+            expect(mockAxiosInstance.post).toHaveBeenCalledWith("/shorten", request);
             // expect(result).toEqual(mockResponse);
         });
 
@@ -179,7 +179,7 @@ describe("SeeSDK", () => {
             mockAxiosInstance.get.mockResolvedValue(mockResponse);
 
             const result = await sdk.listDomains();
-            expect(mockAxiosInstance.get).toHaveBeenCalledWith("/api/v1/domains");
+            expect(mockAxiosInstance.get).toHaveBeenCalledWith("/domains");
             expect(result).toBeDefined();
             expect(result.code).toBe("200");
             expect(result.data).toEqual(mockResponse.data.data);
