@@ -19,6 +19,7 @@ import type {
     DomainListResponse,
     SdkConfig,
     TagsResponse,
+    UrlActionResponse,
     UrlShortenDeleteRequest,
     UrlShortenRequest,
     UrlShortenResponse,
@@ -122,7 +123,7 @@ export class SeeSDK {
      * @returns Promise<any>
      * @deprecated Use `sdk.url.delete` instead
      */
-    async delete(request: UrlShortenDeleteRequest): Promise<UrlShortenResponse> {
+    async delete(request: UrlShortenDeleteRequest): Promise<UrlActionResponse> {
         return this.url.delete(request);
     }
 
@@ -132,7 +133,7 @@ export class SeeSDK {
      * @returns Promise<any>
      * @deprecated Use `sdk.url.update` instead
      */
-    async update(request: UrlShortenUpdateRequest): Promise<UrlShortenResponse> {
+    async update(request: UrlShortenUpdateRequest): Promise<UrlActionResponse> {
         return this.url.update(request);
     }
 

@@ -37,6 +37,24 @@ describe("Swagger synchronized resources", () => {
         });
     });
 
+    it("serializes simple-mode tag IDs using Swagger CSV format", async () => {
+        client.get.mockResolvedValue({ data: "https://s.ee/demo" });
+
+        await sdk.url.createSimple({
+            signature: "test-key",
+            url: "https://example.com",
+            tag_ids: [1, 2, 3],
+        });
+
+        expect(client.get).toHaveBeenCalledWith("/shorten", {
+            params: {
+                signature: "test-key",
+                url: "https://example.com",
+                tag_ids: "1,2,3",
+            },
+        });
+    });
+
     it("uses the Swagger request bodies for QR codes, bio pages, and token checks", async () => {
         client.post.mockResolvedValue({ data: { code: 200, data: {}, message: "ok" } });
         client.delete.mockResolvedValue({ data: { code: 200, data: null, message: "ok" } });
@@ -95,5 +113,34 @@ describe("Swagger synchronized resources", () => {
         expect(client.delete).toHaveBeenCalledWith("/file/large-file/cancel", {
             data: { upload_id: "upload-1" },
         });
+    });
+
+    it("maps file history and large-upload lifecycle endpoints", async () => {
+        client.get.mockResolvedValue({ data: { code: 200, data: {}, message: "ok" } });
+        client.post.mockResolvedValue({ data: { code: 200, data: {}, message: "ok" } });
+        client.head.mockResolvedValue({ headers: { "upload-offset": "128" } });
+        client.delete.mockResolvedValue({ status: 204 });
+
+        await sdk.file.history({ page: 3 });
+        await sdk.file.createLargeUpload({ file_name: "video.mp4", file_size: 1024 });
+        await sdk.file.getLargeUploadProgress("upload-1");
+        const status = await sdk.file.getUploadStatus("upload-1");
+        await sdk.file.deleteLargeUpload("upload-1");
+
+        expect(client.get).toHaveBeenNthCalledWith(1, "/files", { params: { page: 3 } });
+        expect(client.post).toHaveBeenCalledWith("/file/large-file/create", {
+            file_name: "video.mp4",
+            file_size: 1024,
+        });
+        expect(client.get).toHaveBeenNthCalledWith(2, "/file/large-file/progress", {
+            params: { upload_id: "upload-1" },
+        });
+        expect(client.head).toHaveBeenCalledWith("/file/large-file-tus/upload-1", {
+            headers: { "Tus-Resumable": "1.0.0" },
+        });
+        expect(client.delete).toHaveBeenCalledWith("/file/large-file-tus/upload-1", {
+            headers: { "Tus-Resumable": "1.0.0" },
+        });
+        expect(status).toEqual({ upload_offset: 128 });
     });
 });
