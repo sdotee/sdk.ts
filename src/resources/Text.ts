@@ -16,6 +16,8 @@ import type {
     TextActionResponse,
     TextDeleteRequest,
     TextDomainListResponse,
+    HistoryParams,
+    TextHistoryResponse,
 } from "../types";
 
 export class Text extends BaseResource {
@@ -55,6 +57,12 @@ export class Text extends BaseResource {
      */
     async listDomains(): Promise<TextDomainListResponse> {
         const response = await this.client.get<TextDomainListResponse>("/text/domains");
+        return response.data;
+    }
+
+
+    async history(params: HistoryParams = {}): Promise<TextHistoryResponse> {
+        const response = await this.client.get<TextHistoryResponse>("/texts", { params });
         return response.data;
     }
 }
