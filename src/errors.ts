@@ -12,17 +12,17 @@
  * Last Modified: 2025-12-04 17:10:04
  */
 
-import {ApiError} from './types';
+import type { ApiError } from './types';
 
 export class SeeServiceError extends Error {
-    public readonly code: string;
-    public readonly details?: any;
+    public readonly code: string | number;
+    public readonly details?: unknown;
 
     constructor(error: ApiError) {
         super(error.message);
         this.name = 'SeeServiceError';
         this.code = error.code;
-        this.details = error.data || "No additional details provided";
+        this.details = error.data ?? "No additional details provided";
     }
 }
 
