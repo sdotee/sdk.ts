@@ -12,8 +12,9 @@
  * Last Modified: 2026-01-20 16:42:25
  */
 
-import axios, { AxiosInstance } from "axios";
-import {
+import axios from "axios";
+import type { AxiosInstance } from "axios";
+import type {
     ApiError,
     DomainListResponse,
     SdkConfig,
@@ -29,6 +30,9 @@ import { UserAgent } from "./version";
 import { Url } from "./resources/Url";
 import { Text } from "./resources/Text";
 import { Files } from "./resources/Files";
+import { Qrcode } from "./resources/Qrcode";
+import { Bio } from "./resources/Bio";
+import { Account } from "./resources/Account";
 
 export class SeeSDK {
     private client: AxiosInstance;
@@ -37,16 +41,22 @@ export class SeeSDK {
     public url: Url;
     public text: Text;
     public file: Files;
+    public qrcode: Qrcode;
+    public bio: Bio;
+    public account: Account;
 
     constructor(config: SdkConfig) {
         if (config.baseUrl === undefined || config.baseUrl === "") {
-            config.baseUrl = process.env.SEE_API_BASE || "https://s.ee/api/v1";
+            const environmentBaseUrl = process.env.SEE_API_BASE;
+            config.baseUrl = environmentBaseUrl === undefined || environmentBaseUrl === ""
+                ? "https://s.ee/api/v1"
+                : environmentBaseUrl;
         }
 
         this.config = config;
         this.client = axios.create({
             baseURL: config.baseUrl,
-            timeout: config.timeout || 10000,
+            timeout: config.timeout ?? 10000,
             headers: {
                 Authorization: `${config.apiKey}`,
                 "Content-Type": "application/json",
@@ -54,7 +64,7 @@ export class SeeSDK {
             },
         });
 
-        if (process.env.HTTP_PROXY !== undefined && process.env.HTTP_PROXY != "") {
+        if (process.env.HTTP_PROXY !== undefined && process.env.HTTP_PROXY !== "") {
             try {
                 const proxyUrl = new URL(process.env.HTTP_PROXY);
                 this.client.defaults.proxy = {
@@ -62,8 +72,7 @@ export class SeeSDK {
                     host: proxyUrl.hostname,
                     port: parseInt(proxyUrl.port, 10),
                 };
-                console.log("Proxy configured:", this.client.defaults.proxy);
-            } catch (error) {
+            } catch {
                 console.warn("Invalid proxy URL format:", process.env.HTTP_PROXY);
             }
         }
@@ -73,16 +82,19 @@ export class SeeSDK {
         this.url = new Url(this.client);
         this.text = new Text(this.client);
         this.file = new Files(this.client);
+        this.qrcode = new Qrcode(this.client);
+        this.bio = new Bio(this.client);
+        this.account = new Account(this.client);
     }
 
     private setupInterceptors(): void {
         this.client.interceptors.response.use(
-            (response: any) => response,
-            (error: any) => {
+            (response) => response,
+            (error) => {
                 if (error.response) {
                     const apiError: ApiError = {
-                        code: error.response.data?.code || "UNKNOWN_ERROR",
-                        message: error.response.data?.message || "An unknown error occurred",
+                        code: error.response.data?.code ?? "UNKNOWN_ERROR",
+                        message: error.response.data?.message ?? "An unknown error occurred",
                     };
                     throw new SeeServiceError(apiError);
                 } else if (error.request) {

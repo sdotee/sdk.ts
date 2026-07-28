@@ -12,17 +12,17 @@
  * Last Modified: 2026-07-28 20:01:30
  */
 
-import { BaseResource } from './Base';
-import type { TokenCheckResponse, UsageResponse } from '../types';
+import { BaseResource } from "./Base";
+import type { TokenCheckResponse, UsageResponse } from "../types";
 
 export class Account extends BaseResource {
-  async checkToken(token: string): Promise<TokenCheckResponse> {
-    const response = await this.client.post<TokenCheckResponse>('/token/check', { token });
-    return response.data;
-  }
+    async checkToken(token: string): Promise<TokenCheckResponse> {
+        const response = await this.client.post<TokenCheckResponse>("/token/check", { token });
+        return response.data;
+    }
 
-  async usage(): Promise<UsageResponse> {
-    const response = await this.client.get<UsageResponse>('/usage');
-    return response.data;
-  }
+    async usage(): Promise<UsageResponse> {
+        const response = await this.client.get<UsageResponse>("/usage");
+        return response.data;
+    }
 }
