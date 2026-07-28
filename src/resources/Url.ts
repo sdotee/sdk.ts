@@ -18,11 +18,23 @@ import type {
     UrlShortenUpdateRequest,
     DomainListResponse,
     TagsResponse,
+    HistoryParams,
+    LinkHistoryResponse,
+    LinkVisitStatParams,
+    LinkVisitStatResponse,
+    UrlShortenSimpleRequest,
 } from "../types";
 import { Validator } from "../validator";
 import { SeeServiceError, NetworkError } from "../errors";
 
 export class Url extends BaseResource {
+    async createSimple(request: UrlShortenSimpleRequest): Promise<UrlShortenResponse | string> {
+        const response = await this.client.get<UrlShortenResponse | string>("/shorten", {
+            params: request,
+        });
+        return response.data;
+    }
+
     /**
      * Create a shortened URL
      * @param request - The URL shortening request
@@ -49,7 +61,6 @@ export class Url extends BaseResource {
             if (error instanceof SeeServiceError || error instanceof NetworkError) {
                 throw error;
             }
-            console.info(error);
             throw new NetworkError("Failed to create short URL");
         }
     }
@@ -134,5 +145,15 @@ export class Url extends BaseResource {
             }
             throw new NetworkError("Failed to fetch tags");
         }
+    }
+
+    async history(params: HistoryParams = {}): Promise<LinkHistoryResponse> {
+        const response = await this.client.get<LinkHistoryResponse>("/links", { params });
+        return response.data;
+    }
+
+    async visitStats(params: LinkVisitStatParams): Promise<LinkVisitStatResponse> {
+        const response = await this.client.get<LinkVisitStatResponse>("/link/visit-stat", { params });
+        return response.data;
     }
 }

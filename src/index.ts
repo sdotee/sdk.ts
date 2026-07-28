@@ -13,12 +13,7 @@
  */
 
 export { SeeSDK } from './sdk';
-export {
-    UrlShortenRequest,
-    UrlShortenResponse,
-    SdkConfig,
-    ApiError
-} from './types';
+export * from './types';
 export {
     SeeServiceError,
     ValidationError,
