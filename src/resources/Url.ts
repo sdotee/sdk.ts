@@ -8,157 +8,160 @@
  * Author: S.EE Development Team <dev@s.ee>
  */
 
-import { HttpStatusCode } from "axios";
-import type { AxiosResponse } from "axios";
-import { BaseResource } from "./Base";
+import { HttpStatusCode } from 'axios';
+import type { AxiosResponse } from 'axios';
+import { BaseResource } from './Base';
 import type {
-    UrlShortenRequest,
-    UrlShortenResponse,
-    UrlShortenDeleteRequest,
-    UrlShortenUpdateRequest,
-    DomainListResponse,
-    TagsResponse,
-    HistoryParams,
-    LinkHistoryResponse,
-    LinkVisitStatParams,
-    LinkVisitStatResponse,
-    UrlActionResponse,
-    UrlShortenSimpleRequest,
-} from "../types";
-import { Validator } from "../validator";
-import { SeeServiceError, NetworkError } from "../errors";
+  UrlShortenRequest,
+  UrlShortenResponse,
+  UrlShortenDeleteRequest,
+  UrlShortenUpdateRequest,
+  DomainListResponse,
+  TagsResponse,
+  HistoryParams,
+  LinkHistoryResponse,
+  LinkVisitStatParams,
+  LinkVisitStatResponse,
+  UrlActionResponse,
+  UrlShortenSimpleRequest,
+} from '../types';
+import { Validator } from '../validator';
+import { SeeServiceError, NetworkError } from '../errors';
 
 export class Url extends BaseResource {
-    async createSimple(request: UrlShortenSimpleRequest): Promise<UrlShortenResponse | string> {
-        const params = {
-            ...request,
-            tag_ids: request.tag_ids?.join(","),
-        };
-        const response = await this.client.get<UrlShortenResponse | string>("/shorten", {
-            params,
+  async createSimple(request: UrlShortenSimpleRequest): Promise<UrlShortenResponse | string> {
+    const params = {
+      ...request,
+      tag_ids: request.tag_ids?.join(','),
+    };
+    const response = await this.client.get<UrlShortenResponse | string>('/shorten', {
+      params,
+    });
+    return response.data;
+  }
+
+  /**
+   * Create a shortened URL
+   * @param request - The URL shortening request
+   * @returns Promise<UrlShortenResponse>
+   */
+  async create(request: UrlShortenRequest): Promise<UrlShortenResponse> {
+    // Validate input
+    Validator.validateUrl(request.target_url);
+
+    try {
+      const response: AxiosResponse<UrlShortenResponse> = await this.client.post(
+        '/shorten',
+        request,
+      );
+
+      if (!response) {
+        throw new SeeServiceError({
+          message: `Failed to create short URL, status code is not Ok`,
+          code: 'API_ERROR',
         });
+      }
+
+      return {
+        ...response.data,
+      };
+    } catch (error) {
+      if (error instanceof SeeServiceError || error instanceof NetworkError) {
+        throw error;
+      }
+      throw new NetworkError('Failed to create short URL');
+    }
+  }
+
+  /**
+   * Delete a shortened URL
+   * @param request - The delete request
+   * @returns Promise<UrlShortenResponse>
+   */
+  async delete(request: UrlShortenDeleteRequest): Promise<UrlActionResponse> {
+    try {
+      const response: AxiosResponse<UrlActionResponse> = await this.client.delete(`/shorten`, {
+        data: request,
+      });
+      return response.data;
+    } catch (error) {
+      if (error instanceof SeeServiceError || error instanceof NetworkError) {
+        throw error;
+      }
+      throw new NetworkError('Failed to delete short URL');
+    }
+  }
+
+  /**
+   * Update a shortened URL
+   * @param request - The update request
+   * @returns Promise<UrlShortenResponse>
+   */
+  async update(request: UrlShortenUpdateRequest): Promise<UrlActionResponse> {
+    try {
+      const response: AxiosResponse<UrlActionResponse> = await this.client.put('/shorten', request);
+      return response.data;
+    } catch (error) {
+      if (error instanceof SeeServiceError || error instanceof NetworkError) {
+        throw error;
+      }
+
+      throw new NetworkError('Failed to update short URL');
+    }
+  }
+
+  /**
+   * List available domains
+   * @returns Promise<DomainListResponse>
+   */
+  async listDomains(): Promise<DomainListResponse> {
+    try {
+      const response: AxiosResponse<DomainListResponse> = await this.client.get('/domains');
+      if (response.data && response.status === HttpStatusCode.Ok) {
         return response.data;
+      } else {
+        throw new SeeServiceError({
+          code: 'API_ERROR',
+          message: `Failed to fetch domains`,
+        });
+      }
+    } catch (error) {
+      if (error instanceof SeeServiceError || error instanceof NetworkError) {
+        throw error;
+      }
+      throw new NetworkError('Failed to fetch domains');
     }
+  }
 
-    /**
-     * Create a shortened URL
-     * @param request - The URL shortening request
-     * @returns Promise<UrlShortenResponse>
-     */
-    async create(request: UrlShortenRequest): Promise<UrlShortenResponse> {
-        // Validate input
-        Validator.validateUrl(request.target_url);
-
-        try {
-            const response: AxiosResponse<UrlShortenResponse> = await this.client.post("/shorten", request);
-
-            if (!response) {
-                throw new SeeServiceError({
-                    message: `Failed to create short URL, status code is not Ok`,
-                    code: "API_ERROR",
-                });
-            }
-
-            return {
-                ...response.data,
-            };
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-            throw new NetworkError("Failed to create short URL");
-        }
-    }
-
-    /**
-     * Delete a shortened URL
-     * @param request - The delete request
-     * @returns Promise<UrlShortenResponse>
-     */
-    async delete(request: UrlShortenDeleteRequest): Promise<UrlActionResponse> {
-        try {
-            const response: AxiosResponse<UrlActionResponse> = await this.client.delete(`/shorten`, {
-                data: request,
-            });
-            return response.data;
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-            throw new NetworkError("Failed to delete short URL");
-        }
-    }
-
-    /**
-     * Update a shortened URL
-     * @param request - The update request
-     * @returns Promise<UrlShortenResponse>
-     */
-    async update(request: UrlShortenUpdateRequest): Promise<UrlActionResponse> {
-        try {
-            const response: AxiosResponse<UrlActionResponse> = await this.client.put("/shorten", request);
-            return response.data;
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-
-            throw new NetworkError("Failed to update short URL");
-        }
-    }
-
-    /**
-     * List available domains
-     * @returns Promise<DomainListResponse>
-     */
-    async listDomains(): Promise<DomainListResponse> {
-        try {
-            const response: AxiosResponse<DomainListResponse> = await this.client.get("/domains");
-            if (response.data && response.status === HttpStatusCode.Ok) {
-                return response.data;
-            } else {
-                throw new SeeServiceError({
-                    code: "API_ERROR",
-                    message: `Failed to fetch domains`,
-                });
-            }
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-            throw new NetworkError("Failed to fetch domains");
-        }
-    }
-
-    /**
-     * List Available Tags
-     */
-    async listTags(): Promise<TagsResponse> {
-        try {
-            const response: AxiosResponse<TagsResponse> = await this.client.get("/tags");
-            if (response.data && response.status === HttpStatusCode.Ok) {
-                return response.data;
-            } else {
-                throw new SeeServiceError({
-                    code: "API_ERROR",
-                    message: `Failed to fetch tags`,
-                });
-            }
-        } catch (error) {
-            if (error instanceof SeeServiceError || error instanceof NetworkError) {
-                throw error;
-            }
-            throw new NetworkError("Failed to fetch tags");
-        }
-    }
-
-    async history(params: HistoryParams = {}): Promise<LinkHistoryResponse> {
-        const response = await this.client.get<LinkHistoryResponse>("/links", { params });
+  /**
+   * List Available Tags
+   */
+  async listTags(): Promise<TagsResponse> {
+    try {
+      const response: AxiosResponse<TagsResponse> = await this.client.get('/tags');
+      if (response.data && response.status === HttpStatusCode.Ok) {
         return response.data;
+      } else {
+        throw new SeeServiceError({
+          code: 'API_ERROR',
+          message: `Failed to fetch tags`,
+        });
+      }
+    } catch (error) {
+      if (error instanceof SeeServiceError || error instanceof NetworkError) {
+        throw error;
+      }
+      throw new NetworkError('Failed to fetch tags');
     }
+  }
 
-    async visitStats(params: LinkVisitStatParams): Promise<LinkVisitStatResponse> {
-        const response = await this.client.get<LinkVisitStatResponse>("/link/visit-stat", { params });
-        return response.data;
-    }
+  async history(params: HistoryParams = {}): Promise<LinkHistoryResponse> {
+    const response = await this.client.get<LinkHistoryResponse>('/links', { params });
+    return response.data;
+  }
+
+  async visitStats(params: LinkVisitStatParams): Promise<LinkVisitStatResponse> {
+    const response = await this.client.get<LinkVisitStatResponse>('/link/visit-stat', { params });
+    return response.data;
+  }
 }

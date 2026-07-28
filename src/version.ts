@@ -12,5 +12,5 @@
  * Last Modified: 2026-01-20 16:47:44
  */
 
-export const Version = "1.1.0";
+export const Version = '1.1.0';
 export const UserAgent = `S.EE-TypeScript-SDK/${Version}`;
