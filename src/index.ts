@@ -14,9 +14,5 @@
 
 export { SeeSDK } from './sdk';
 export * from './types';
-export {
-    SeeServiceError,
-    ValidationError,
-    NetworkError
-} from './errors';
-export {Validator} from './validator';
+export { SeeServiceError, ValidationError, NetworkError } from './errors';
+export { Validator } from './validator';
