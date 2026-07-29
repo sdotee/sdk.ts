@@ -11,17 +11,17 @@
 import { BaseResource } from './Base';
 import type { AxiosRequestConfig } from 'axios';
 import type {
+  ApiResponse,
+  CompleteLargeFileUploadResponse,
+  CreateLargeFileUploadRequest,
+  CreateLargeFileUploadResponse,
   FileUploadResponse,
   FileDeleteResponse,
   FileDomainListResponse,
-  HistoryParams,
   FileHistoryResponse,
-  PrivateFileUrlResponse,
-  CreateLargeFileUploadRequest,
-  CreateLargeFileUploadResponse,
+  HistoryParams,
   LargeFileUploadProgressResponse,
-  CompleteLargeFileUploadResponse,
-  ApiResponse,
+  PrivateFileUrlResponse,
   TusUploadStatus,
 } from '../types';
 
@@ -78,53 +78,49 @@ export class Files extends BaseResource {
     return response.data;
   }
 
-  async uploadChunk(
-    uploadId: string,
-    chunk: unknown,
-    uploadOffset: number,
-    config: AxiosRequestConfig = {},
-  ): Promise<TusUploadStatus> {
-    const response = await this.client.patch(`/file/large-file-tus/${uploadId}`, chunk, {
-      ...config,
-      headers: {
-        'Content-Type': 'application/offset+octet-stream',
-        'Tus-Resumable': '1.0.0',
-        'Upload-Offset': uploadOffset,
-        ...config.headers,
-      },
-    });
-    return this.readTusStatus(response.headers);
-  }
-
-  async getLargeUploadStatus(uploadId: string): Promise<TusUploadStatus> {
-    const response = await this.client.head(`/file/large-file-tus/${uploadId}`, {
-      headers: { 'Tus-Resumable': '1.0.0' },
-    });
-    return this.readTusStatus(response.headers);
-  }
-
-  async deleteLargeUpload(uploadId: string): Promise<void> {
-    await this.client.delete(`/file/large-file-tus/${uploadId}`, {
-      headers: { 'Tus-Resumable': '1.0.0' },
-    });
-  }
-
   async getLargeUploadProgress(uploadId: string): Promise<LargeFileUploadProgressResponse> {
     const response = await this.client.get<LargeFileUploadProgressResponse>(
       '/file/large-file/progress',
-      {
-        params: { upload_id: uploadId },
-      },
+      { params: { upload_id: uploadId } },
     );
     return response.data;
+  }
+
+  async getUploadStatus(uploadId: string): Promise<TusUploadStatus> {
+    const response = await this.client.head(
+      `/file/large-file-tus/${encodeURIComponent(uploadId)}`,
+      {
+        headers: { 'Tus-Resumable': '1.0.0' },
+      },
+    );
+    return this.parseTusStatus(response.headers);
+  }
+
+  async uploadChunk(uploadId: string, chunk: unknown, offset: number): Promise<TusUploadStatus> {
+    const response = await this.client.patch(
+      `/file/large-file-tus/${encodeURIComponent(uploadId)}`,
+      chunk,
+      {
+        headers: {
+          'Content-Type': 'application/offset+octet-stream',
+          'Tus-Resumable': '1.0.0',
+          'Upload-Offset': offset,
+        },
+      },
+    );
+    return this.parseTusStatus(response.headers);
+  }
+
+  async deleteLargeUpload(uploadId: string): Promise<void> {
+    await this.client.delete(`/file/large-file-tus/${encodeURIComponent(uploadId)}`, {
+      headers: { 'Tus-Resumable': '1.0.0' },
+    });
   }
 
   async completeLargeUpload(uploadId: string): Promise<CompleteLargeFileUploadResponse> {
     const response = await this.client.post<CompleteLargeFileUploadResponse>(
       '/file/large-file/complete',
-      {
-        upload_id: uploadId,
-      },
+      { upload_id: uploadId },
     );
     return response.data;
   }
@@ -136,10 +132,12 @@ export class Files extends BaseResource {
     return response.data;
   }
 
-  private readTusStatus(headers: Record<string, unknown>): TusUploadStatus {
+  private parseTusStatus(headers: Record<string, unknown>): TusUploadStatus {
+    const uploadOffset = Number(headers['upload-offset']);
     const uploadLength = headers['upload-length'];
+
     return {
-      upload_offset: Number(headers['upload-offset'] ?? 0),
+      upload_offset: uploadOffset,
       ...(uploadLength === undefined ? {} : { upload_length: Number(uploadLength) }),
     };
   }
