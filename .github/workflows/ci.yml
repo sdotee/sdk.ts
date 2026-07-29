@@ -36,7 +36,7 @@ jobs:
       - name: Lint source
         run: pnpm run lint
       - name: Run tests
-        run: pnpm run test -- --runInBand
+        run: pnpm run test --runInBand
       - name: Build package
         run: pnpm run build
 
