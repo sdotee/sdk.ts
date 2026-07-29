@@ -46,6 +46,8 @@ export interface UrlShortenResponse {
   };
 }
 
+export type UrlActionResponse = ApiResponse;
+
 export interface UrlShortenSimpleRequest {
   signature: string;
   url: string;
@@ -110,7 +112,7 @@ export interface TextCreateRequest {
 }
 
 export interface TextResponseData {
-  custom_slug: string;
+  custom_slug?: string;
   short_url: string;
   slug: string;
 }
@@ -236,16 +238,16 @@ export interface FileInfo {
   file_id: number;
   filename: string;
   hash: string;
-  height: number;
+  height?: number;
   mime_type: string;
   page: string;
   path: string;
   size: number;
   storename: string;
-  thumb_url: string;
+  thumb_url?: string;
   upload_status: number;
   url: string;
-  width: number;
+  width?: number;
 }
 
 export type FileHistoryResponse = ApiResponse<FileInfo[]>;
@@ -305,7 +307,7 @@ export interface LargeFileUploadProgressData {
 }
 
 export type LargeFileUploadProgressResponse = ApiResponse<LargeFileUploadProgressData>;
-export type CompleteLargeFileUploadResponse = ApiResponse<{ file: FileInfo; short_link: string }>;
+export type CompleteLargeFileUploadResponse = ApiResponse<{ file: FileInfo; short_link?: string }>;
 
 export interface TusUploadStatus {
   upload_offset: number;

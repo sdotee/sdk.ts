@@ -8,8 +8,8 @@
  * Author: S.EE Development Team <dev@s.ee>
  */
 
-import type { AxiosResponse } from 'axios';
 import { HttpStatusCode } from 'axios';
+import type { AxiosResponse } from 'axios';
 import { BaseResource } from './Base';
 import type {
   UrlShortenRequest,
@@ -22,6 +22,7 @@ import type {
   LinkHistoryResponse,
   LinkVisitStatParams,
   LinkVisitStatResponse,
+  UrlActionResponse,
   UrlShortenSimpleRequest,
 } from '../types';
 import { Validator } from '../validator';
@@ -29,8 +30,12 @@ import { SeeServiceError, NetworkError } from '../errors';
 
 export class Url extends BaseResource {
   async createSimple(request: UrlShortenSimpleRequest): Promise<UrlShortenResponse | string> {
+    const params = {
+      ...request,
+      tag_ids: request.tag_ids?.join(','),
+    };
     const response = await this.client.get<UrlShortenResponse | string>('/shorten', {
-      params: request,
+      params,
     });
     return response.data;
   }
@@ -73,9 +78,9 @@ export class Url extends BaseResource {
    * @param request - The delete request
    * @returns Promise<UrlShortenResponse>
    */
-  async delete(request: UrlShortenDeleteRequest): Promise<UrlShortenResponse> {
+  async delete(request: UrlShortenDeleteRequest): Promise<UrlActionResponse> {
     try {
-      const response: AxiosResponse<UrlShortenResponse> = await this.client.delete(`/shorten`, {
+      const response: AxiosResponse<UrlActionResponse> = await this.client.delete(`/shorten`, {
         data: request,
       });
       return response.data;
@@ -83,7 +88,7 @@ export class Url extends BaseResource {
       if (error instanceof SeeServiceError || error instanceof NetworkError) {
         throw error;
       }
-      throw new NetworkError('Failed to update short URL');
+      throw new NetworkError('Failed to delete short URL');
     }
   }
 
@@ -92,12 +97,9 @@ export class Url extends BaseResource {
    * @param request - The update request
    * @returns Promise<UrlShortenResponse>
    */
-  async update(request: UrlShortenUpdateRequest): Promise<UrlShortenResponse> {
+  async update(request: UrlShortenUpdateRequest): Promise<UrlActionResponse> {
     try {
-      const response: AxiosResponse<UrlShortenResponse> = await this.client.put(
-        '/shorten',
-        request,
-      );
+      const response: AxiosResponse<UrlActionResponse> = await this.client.put('/shorten', request);
       return response.data;
     } catch (error) {
       if (error instanceof SeeServiceError || error instanceof NetworkError) {
