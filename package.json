@@ -26,6 +26,10 @@
     "service",
     "api"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sdotee/sdk.ts.git"
+  },
   "files": [
     "dist"
   ],
