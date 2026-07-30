@@ -1,11 +1,13 @@
 name: Publish to npm
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
 
 concurrency:
-  group: npm-publish-${{ github.event.release.tag_name }}
+  group: npm-publish-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -15,13 +17,10 @@ permissions:
 jobs:
   publish:
     name: Publish package
-    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.release.tag_name }}
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
       - name: Set up Node.js
@@ -32,11 +31,16 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Verify release version
+      - name: Verify tag version
+        if: startsWith(github.ref, 'refs/tags/')
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.ref_name }}
         run: node -e "const version = require('./package.json').version; if (process.env.RELEASE_TAG !== 'v' + version) { throw new Error('Release tag must be v' + version); }"
       - name: Validate package
         run: pnpm run validate
+      - name: Check published version
+        id: published
+        run: node -e "const { name, version } = require('./package.json'); require('child_process').execFile('npm', ['view', name + '@' + version, 'version'], error => require('fs').appendFileSync(process.env.GITHUB_OUTPUT, 'exists=' + !error + '\n'));"
       - name: Publish package
+        if: steps.published.outputs.exists != 'true'
         run: npm publish --access public --provenance
